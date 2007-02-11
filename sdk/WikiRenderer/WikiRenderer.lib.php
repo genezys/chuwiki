@@ -1,19 +1,14 @@
 <?php
 /**
- * Bibliotheque d'objets permettant de tranformer un texte, contenant des signes de formatages
- * simples de type wiki, en un autre format tel que XHTML 1.0/strict
+ * Wikirenderer is a wiki text parser. It can transform a wiki text into xhtml or other formats
+ * @package WikiRenderer
  * @author Laurent Jouanneau <jouanneau@netcourrier.com>
- * @copyright 2003-2004 Laurent Jouanneau
- * @module Wiki Renderer
- * @version 2.0.6
- * @since 26/09/2004
- * http://ljouanneau.com/softs/wikirenderer/
- * Thanks to all users who found bugs : Loic, Edouard Guerin, Sylvain, Ludovic L.
+ * @copyright 2003-2007 Laurent Jouanneau
+ * @link http://wikirenderer.berlios.de
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * modify it under the terms of the GNU Lesser General Public 2.1
+ * License as published by the Free Software Foundation.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,229 +21,331 @@
  *
  */
 define('WIKIRENDERER_PATH', dirname(__FILE__).'/');
+define('WIKIRENDERER_VERSION', '3.0-php4');
 
 /**
- * Implémente les propriétés d'un tag inline wiki et le fonctionnement pour la génération
- * du code html correspondant
+ * base class to generate output from inline wiki tag
+ *
+ * this objects are driven by the wiki inline parser
+ * @package WikiRenderer
+ * @abstract
+ * @see WikiInlineParser
  */
 class WikiTag {
-   var $name;
-   var $beginTag;
-   var $endTag;
-   var $useSeparator=true;
-   var $attribute=array();
-   var $builderFunction=null;
 
-   var $contents=array();
-   var $separatorCount=0;
-   var $isDummy=false;
+    var $beginTag='';
+    var $endTag='';
+    var $attribute=array();
+    var $isTextLineTag=false;
+    var $separators=array();
+    var $checkWikiWordIn=array();
 
-   function WikiTag($name, $properties){
-      $this->name=$name;
-      $this->beginTag=$properties[0];
-      $this->endTag=$properties[1];
-      if($this->name == 'dummie')
-         $this->isDummy=true;
+    // private
+    var $contents=array('');
+    var $wikiContentArr = array('');
+    var $wikiContent='';
+    var $separatorCount=0;
+    var $separator=false;
+    var $checkWikiWordFunction=false;
+    var $config = null;
+    /**
+    * @param WikiRendererConfig $config
+    */
+    function WikiTag(&$config){
+        $this->config = & $config;
+        $this->checkWikiWordFunction=$config->checkWikiWordFunction;
+        if($config->checkWikiWordFunction === null) $this->checkWikiWordIn=array();
+        if(count($this->separators)) $this->separator= $this->separators[0];
+    }
 
-      if(is_null($properties[2])){
-         $this->attribute=array();
-         $this->useSeparator=false;
-      }else{
-         $this->attribute=$properties[2];
-         $this->useSeparator=(count($this->attribute)>0);
-      }
-
-      $this->builderFunction=$properties[3];
-   }
-
-   function addContent($string, $escape=true){
-      if(!isset($this->contents[$this->separatorCount]))
-         $this->contents[$this->separatorCount]='';
-
-      if($escape)
-         $this->contents[$this->separatorCount] .= htmlspecialchars($string);
-      else
-         $this->contents[$this->separatorCount] .= $string;
-   }
-
-   function addseparator(){
-      $this->separatorCount++;
-   }
-
-   function getHtmlContent(){
-      if(is_null($this->builderFunction)){
-         $attr='';
-         if($this->useSeparator){
-            $cntattr=count($this->attribute);
-            $count=($this->separatorCount > $cntattr?$cntattr:$this->separatorCount);
-            for($i=1;$i<=$count;$i++){
-               $attr.=' '.$this->attribute[$i-1].'="'.$this->contents[$i].'"';
+    /**
+    * called by the inline parser, when it found a new content
+    * @param string $wikiContent   the original content in wiki syntax if $parsedContent is given, or a simple string if not
+    * @param string $parsedContent the content already parsed (by an other wikitag object), when this wikitag contents other wikitags
+    * @final
+    */
+    function addContent($wikiContent, $parsedContent=false){
+        if($parsedContent === false){
+            $parsedContent =$this->_doEscape($wikiContent);
+            if(count( $this->checkWikiWordIn)
+                && isset($this->attribute[$this->separatorCount])
+                && in_array($this->attribute[$this->separatorCount], $this->checkWikiWordIn)){
+                $parsedContent=$this->_findWikiWord($parsedContent);
             }
-         }
-         if(isset($this->contents[0]))
-            return '<'.$this->name.$attr.'>'.$this->contents[0].'</'.$this->name.'>';
-         else
-            return '<'.$this->name.$attr.' />';
-      }else{
-         $fct=$this->builderFunction;
-         return $fct($this->contents, $this->attribute);
-      }
-   }
+        }
+        $this->contents[$this->separatorCount] .= $parsedContent;
+        $this->wikiContentArr[$this->separatorCount] .= $wikiContent;
+    }
+
+    /**
+    * called by the inline parser, when it found a separator
+    * @final
+    */
+    function addseparator(){
+        $this->wikiContent.= $this->wikiContentArr[$this->separatorCount];
+        $this->separatorCount++;
+        if($this->separatorCount> count($this->separators))
+            $this->separator = end($this->separators);
+        else
+            $this->separator = $this->separators[$this->separatorCount-1];
+        $this->wikiContent.= $this->separator;
+        $this->contents[$this->separatorCount]='';
+        $this->wikiContentArr[$this->separatorCount]='';
+    }
+
+    /**
+    * return the separator used by this tag.
+    *
+    * The tag can support many separator
+    * @return string the separator
+    */
+    function getCurrentSeparator(){
+            return $this->separator;
+    }
+
+    /**
+    * return the wiki content of the tag
+    * @return string the content
+    * @final
+    */
+    function getWikiContent(){
+        return $this->beginTag.$this->wikiContent.$this->wikiContentArr[$this->separatorCount].$this->endTag;
+    }
+
+    /**
+    * return the generated content of the tag
+    * @return string the content
+    */
+    function getContent(){ return $this->contents[0];}
+
+    /**
+    * return the generated content of the tag
+    * @return string the content
+    * @final
+    */
+    function getBogusContent(){
+        $c=$this->beginTag;
+        $m= count($this->contents)-1;
+        $s= count($this->separators);
+        foreach($this->contents as $k=>$v){
+            $c.=$v;
+            if($k< $m){
+                if($k < $s)
+                    $c.=$this->separators[$k];
+                else
+                    $c.=end($this->separators);
+            }
+        }
+
+        return $c;
+    }
+
+    /**
+    * escape a simple string.
+    * @access protected
+    */
+    function _doEscape($string){
+        return $string;
+    }
+
+    function _findWikiWord($string){
+        if($this->checkWikiWordFunction !== null && preg_match_all("/(?<=\b)[A-Z][a-z]+[A-Z0-9]\w*/", $string, $matches)){
+            $fct=$this->checkWikiWordFunction;
+            $match = array_unique($matches[0]); // il faut avoir une liste sans doublon, à cause du str_replace suivant...
+            $string= str_replace($match, $fct($match), $string);
+        }
+        return $string;
+    }
+
 }
 
 /**
- * Moteur permettant de transformer les tags wiki inline d'une chaine en équivalent HTML
+ *
+ */
+class WikiTextLine extends WikiTag {
+    var $isTextLineTag=true;
+}
+
+
+/**
+ *
+ */
+class WikiHtmlTextLine extends WikiTag {
+    var $isTextLineTag=true;
+    var $attribute=array('$$');
+    var $checkWikiWordIn=array('$$');
+
+   function _doEscape($string){
+      return htmlspecialchars($string);
+   }
+}
+
+
+/**
+ * a base class for wiki inline tag, to generate XHTML element.
+ * @package WikiRenderer
+ * @abstract
+ */
+class WikiTagXhtml extends WikiTag {
+   var $name;
+   var $attribute=array('$$');
+   var $checkWikiWordIn=array('$$');
+
+   function getContent(){
+        $attr='';
+        $cntattr=count($this->attribute);
+        $count=($this->separatorCount >= $cntattr?$cntattr-1:$this->separatorCount);
+        $content='';
+
+        for($i=0;$i<=$count;$i++){
+            if($this->attribute[$i] != '$$')
+                $attr.=' '.$this->attribute[$i].'="'.htmlspecialchars($this->wikiContentArr[$i]).'"';
+            else
+                $content = $this->contents[$i];
+        }
+        return '<'.$this->name.$attr.'>'.$content.'</'.$this->name.'>';
+   }
+
+   function _doEscape($string){
+       return htmlspecialchars($string);
+   }
+}
+
+
+/**
+ * The parser used to find all inline tag in a single line of text
+ * @package WikiRenderer
+ * @abstract
  */
 class WikiInlineParser {
 
-   var $resultline='';
-   var $error=false;
-   var $listTag=array();
-   var $str=array();
-   var $splitPattern='';
-   var $checkWikiWord=false;
-   var $checkWikiWordFunction=null;
-   var $_separator;
-   var $escapeHtml=true;
-   /**
+    var $listTag=array();
+    var $simpletags=array();
+
+    var $resultline='';
+    var $error=false;
+    var $str=array();
+    var $splitPattern='';
+    var $_separator;
+    var $config;
+    /**
     * constructeur
     * @param   array    $inlinetags liste des tags permis
-    *   @param   string   caractère séparateur des différents composants d'un tag wiki
+    * @param   string   caractère séparateur des différents composants d'un tag wiki
     */
-   function WikiInlineParser($inlinetags, $simpletags, $separator='|', $checkWikiWord=false,
-      $funcCheckWikiWord=null, $escapeHtml=true  ){
+    function WikiInlineParser(&$config){
 
-      foreach($inlinetags as $name=>$prop){
-         $this->listTag[$prop[0]]=new WikiTag($name,$prop);
+        $separators = array();
+        $this->escapeChar = '\\';
+        $this->config = & $config;
+        foreach($config->inlinetags as $class){
+            $t = new $class($config);
+            $this->listTag[$t->beginTag]=$t;
 
-         $this->splitPattern.=preg_replace ( '/([^\w\s\d])/', '\\\\\\1',$prop[0]).')|(';
-         if($prop[1] != $prop[0])
-            $this->splitPattern.=preg_replace ( '/([^\w\s\d])/', '\\\\\\1',$prop[1]).')|(';
-      }
-      foreach($simpletags as $tag=>$html){
-         $this->splitPattern.=preg_replace ( '/([^\w\s\d])/', '\\\\\\1',$tag).')|(';
-      }
+            $this->splitPattern.=preg_quote($t->beginTag).')|(';
+            if($t->beginTag!= $t->endTag)
+                $this->splitPattern.=preg_quote($t->endTag).')|(';
+            $separators = array_merge($separators, $t->separators);
+        }
+        foreach($config->simpletags as $tag=>$html){
+            $this->splitPattern.=preg_quote($tag).')|(';
+        }
+        $separators= array_unique($separators);
+        foreach($separators as $sep){
+            $this->splitPattern.=preg_quote($sep).')|(';
+        }
 
-      $this->simpletags= $simpletags;
-      $this->_separator=$separator;
-      $this->checkWikiWord=$checkWikiWord;
-      $this->checkWikiWordFunction=$funcCheckWikiWord;
-      $this->escapeHtml=$escapeHtml;
-   }
+        $this->splitPattern = '/('.$this->splitPattern.preg_quote($this->escapeChar ).')/';
+        $this->simpletags= $config->simpletags;
+    }
 
-   /**
+    /**
     * fonction principale du parser.
     * @param   string   $line avec des eventuels tag wiki
     * @return  string   chaine $line avec les tags wiki transformé en HTML
     */
-   function parse($line){
-      $this->error=false;
+    function parse($line){
+        $this->error=false;
 
-      $this->str=preg_split('/('.$this->splitPattern.'\\'.$this->_separator.')|(\\\\)/',$line, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
-      $this->end=count($this->str);
-      if($this->end > 1){
-         $firsttag=new WikiTag('dummie',array('','', null,'wikibuilddummie'));
-         $pos=-1;
-         return $this->_parse($firsttag, $pos);
-      }else{
-         if($this->escapeHtml){
-            if($this->checkWikiWord && $this->checkWikiWordFunction !== null)
-               return  $this->_doCheckWikiWord(htmlspecialchars($line));
-            else
-               return htmlspecialchars($line);
-         }else{
-            if($this->checkWikiWord && $this->checkWikiWordFunction !== null)
-               return  $this->_doCheckWikiWord($line);
-            else
-               return $line;
-         }
+        $this->str = preg_split($this->splitPattern,$line, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        $this->end = count($this->str);
+        $l = $this->config->textLineContainer;
+        $firsttag = new $l($this->config);
 
-      }
-   }
+        if($this->end > 1){
+            $pos=-1;
+            $this->_parse($firsttag, $pos);
+            return $firsttag->getContent();
+        }else{
+            $firsttag->addContent($line);
+            return  $firsttag->getContent();
+        }
+    }
 
-   /**
+
+    /**
     * coeur du parseur. Appelé récursivement
+    * @return integer new position
     */
-   function _parse($tag, &$posstart){
+    function _parse(&$tag, $posstart){
 
       $checkNextTag=true;
-      $checkBeginTag=true;
-
+      $brutContent = '';
       // on parcours la chaine,  morceau aprés morceau
       for($i=$posstart+1; $i < $this->end; $i++){
             $t=&$this->str[$i];
+            $brutContent.=$t;
             // a t-on un antislash ?
-            if($t=='\\'){
+            if($t === $this->escapeChar){
                if($checkNextTag){
-                  $t=''; // oui -> on l'efface et on ignore le tag (on continue)
+                  $t=''; // oui -> on ignore le tag (on continue)
                   $checkNextTag=false;
                }else{
-                  // si on est là, c'est que précédement c'etait un \
-                  $tag->addContent('\\',false);
+                  // si on est là, c'est que précédement c'etait un anti slash
+                  $tag->addContent($this->escapeChar); //,false);
                   $checkNextTag=true;
                }
 
             // est-ce un séparateur ?
-            }elseif($t == $this->_separator){
-               if($tag->isDummy || !$checkNextTag)
-                  $tag->addContent($this->_separator,false);
-               elseif($tag->useSeparator){
-                  $checkBeginTag=false;
-                  $tag->addSeparator();
-               }else{
-                  $tag->addContent($this->_separator,false);
-               }
-            // a-t-on une balise de fin du tag ?
-            }elseif($checkNextTag && $tag->endTag == $t && !$tag->isDummy){
-               $posstart=$i;
-               return $tag->getHtmlContent();
+            }elseif($t === $tag->getCurrentSeparator()){
+                $tag->addSeparator();
 
-            // a-t-on une balise de debut de tag quelconque ?
-            }elseif($checkBeginTag && $checkNextTag && isset($this->listTag[$t]) ){
+            }elseif($checkNextTag){
+                // a-t-on une balise de fin du tag ?
+                if($tag->endTag == $t && !$tag->isTextLineTag){
+                    return $i;
+                // a-t-on une balise de debut de tag quelconque ?
+                }elseif( isset($this->listTag[$t]) ){
+                    $newtag = $this->listTag[$t];
+                    $i=$this->_parse($newtag,$i);
+                    if($i !== false){
+                        $tag->addContent($newtag->getWikiContent(), $newtag->getContent());
+                    }else{
+                        $i=$this->end;
+                        $tag->addContent($newtag->getWikiContent(), $newtag->getBogusContent());
+                    }
 
-               $content = $this->_parse($this->listTag[$t],$i);
-               if($content)
-                  $tag->addContent($content,false);
-               else{
-                  if($tag->separatorCount == 0 && $this->checkWikiWord && $this->checkWikiWordFunction !== null){
-                     if($this->escapeHtml)
-                        $tag->addContent($this->_doCheckWikiWord(htmlspecialchars($t)),false);
-                     else
-                        $tag->addContent($this->_doCheckWikiWord($t),false);
-                  }else
-                       $tag->addContent($t,$this->escapeHtml);
-               }
-
-            // a-t-on un saut de ligne forcé ?
-            }elseif($checkNextTag && $checkBeginTag && isset($this->simpletags[$t])){
-               $tag->addContent($this->simpletags[$t],false);
+                // a-t-on un tag simple ?
+                }elseif( isset($this->simpletags[$t])){
+                    $tag->addContent($t, $this->simpletags[$t]);
+                }else{
+                    $tag->addContent($t);
+                }
             }else{
-               if($tag->separatorCount == 0 && $this->checkWikiWord && $this->checkWikiWordFunction !== null){
-                  if($this->escapeHtml)
-                     $tag->addContent($this->_doCheckWikiWord(htmlspecialchars($t)),false);
-                  else
-                     $tag->addContent($this->_doCheckWikiWord($t),false);
-               }else
-                  $tag->addContent($t,$this->escapeHtml);
-               $checkNextTag=true;
+                if(isset($this->listTag[$t]) || isset($this->simpletags[$t]) || $tag->endTag == $t)
+                    $tag->addContent($t);
+                else
+                    $tag->addContent($this->escapeChar.$t);
+                $checkNextTag=true;
             }
       }
-      if(!$tag->isDummy ){
+      if(!$tag->isTextLineTag ){
          //--- on n'a pas trouvé le tag de fin
          // on met en erreur
          $this->error=true;
          return false;
       }else
-         return $tag->getHtmlContent();
-   }
-
-   function _doCheckWikiWord($string){
-      if(preg_match_all("/(?<=\b)[A-Z][a-z]+[A-Z0-9]\w*/", $string, $matches)){
-         $fct=$this->checkWikiWordFunction;
-         $match = array_unique($matches[0]); // il faut avoir une liste sans doublon, à cause du str_replace plus loin...
-         $string=str_replace($match, $fct($match), $string);
-      }
-      return $string;
+        return $this->end;
    }
 
 }
@@ -267,13 +364,13 @@ class WikiRendererBloc {
    var $type='';
 
    /**
-    * @var string  chaine contenant le tag XHTML d'ouverture du bloc
+    * @var string  chaine qui sera insérée à l'ouverture du bloc
     * @access private
     */
    var $_openTag='';
 
    /**
-    * @var string  chaine contenant le tag XHTML de fermeture du bloc
+    * @var string  chaine qui sera insérée à la fermeture du bloc
     * @access private
     */
    var $_closeTag='';
@@ -358,25 +455,51 @@ class WikiRendererBloc {
    function _renderInlineTag($string){
       return $this->engine->inlineParser->parse($string);
    }
-
-   /**
-    * détection d'attributs de bloc (ex:  >°°attr1|attr2|attr3°° la citation )
-    * @todo à terminer pour une version ulterieure
-    */
-   function _checkAttributes(&$string){
-      $bat=$this->engine->config->blocAttributeTag;
-      if(preg_match("/^$bat(.*)$bat(.*)$/",$string,$result)){
-         $string=$result[2];
-         return explode($this->engine->config->inlineTagSeparator,$result[1]);
-      }else
-         return false;
-   }
-
 }
 
-require(WIKIRENDERER_PATH . 'WikiRenderer.conf.php');
+
+/**
+ * classe de base pour la configuration
+ * @bastract
+ */
+
+class WikiRendererConfig {
+
+   /**
+    * @var array   liste des tags inline
+   */
+   var $inlinetags= array();
+
+   var $textLineContainer = 'WikiTextLine';
+
+   /**
+   * liste des balises de type bloc reconnus par WikiRenderer.
+   */
+   var $bloctags = array();
 
 
+   var $simpletags = array();
+
+   var $checkWikiWordFunction = null;
+
+   /**
+    * methode invoquée avant le parsing
+    * Peut être utilisée selon les besoins des rêgles
+    */
+    function onStart($texte){
+
+        return $texte;
+    }
+
+   /**
+    * methode invoquée aprés le parsing
+    * Peut être utilisée selon les besoins des rêgles
+    */
+    function onParse($finalTexte){
+        return $finalTexte;
+    }
+
+}
 
 /**
  * Moteur de rendu. Classe principale à instancier pour transformer un texte wiki en texte XHTML.
@@ -387,33 +510,22 @@ require(WIKIRENDERER_PATH . 'WikiRenderer.conf.php');
 class WikiRenderer {
 
    /**
-    * @var   string   contient la version HTML du texte analysé
+    * @var   string   contient  du texte analysé
     * @access private
     */
    var $_newtext;
 
    /**
-    * @var   boolean
-    * @access private
-    */
-   var $_isBlocOpen=false;
-
-   /**
     * @var WikiRendererBloc element bloc ouvert en cours
     * @access private
     */
-   var $_currentBloc;
+   var $_currentBloc=null;
 
    /**
     * @var array       liste des differents types de blocs disponibles
     * @access private
     */
    var $_blocList= array();
-
-   /**
-    * @var   array      liste de paramètres pour le moteur
-    */
-   var $params=array();
 
    /**
     * @var WikiInlineParser   analyseur pour les tags wiki inline
@@ -423,7 +535,7 @@ class WikiRenderer {
    /**
     * liste des lignes où il y a une erreur wiki
     */
-   var $errors;
+   var $errors=array();
 
 
    var $config=null;
@@ -431,22 +543,27 @@ class WikiRenderer {
     * instancie les différents objets pour le rendu des elements inline et bloc.
     */
    function WikiRenderer( $config=null){
-      if(is_null($config))
-         $this->config= & new WikiRendererConfig;
-      else
+
+      if(is_string($config)){
+          $f = WIKIRENDERER_PATH.'rules/'.basename($config).'.php';
+          if(file_exists($f)){
+              require_once($f);
+              $this->config= new $config();
+          }else
+             trigger_error('Wikirenderer : bad config name', E_USER_ERROR);
+
+      }elseif(is_object($config)){
          $this->config=$config;
-
-      $this->_currentBloc = new WikiRendererBloc($this); // bloc 'fantome'
-      $this->inlineParser =& new WikiInlineParser($this->config->inlinetags,
-         $this->config->simpletags, $this->config->inlineTagSeparator,
-         $this->config->checkWikiWord, $this->config->checkWikiWordFunction, $this->config->escapeSpecialChars);
-
-      foreach($this->config->bloctags as $name=>$ok){
-         $name='WRB_'.$name;
-         if($ok) $this->_blocList[]=& new $name($this);
+      }else{
+         require_once(WIKIRENDERER_PATH . 'rules/wr3_to_xhtml.php');
+         $this->config= new wr3_to_xhtml();
       }
 
+      $this->inlineParser =& new WikiInlineParser($this->config);
 
+      foreach($this->config->bloctags as $name){
+         $this->_blocList[]= new $name($this);
+      }
    }
 
    /**
@@ -455,84 +572,90 @@ class WikiRenderer {
      * @return  string  le texte converti en XHTML
     */
    function render($texte){
+      $texte = $this->config->onStart($texte);
+
       $lignes=preg_split("/\015\012|\015|\012/",$texte); // on remplace les \r (mac), les \n (unix) et les \r\n (windows) par un autre caractère pour découper proprement
 
       $this->_newtext=array();
-      $this->_isBlocOpen=false;
-      $this->errors=false;
-      $this->_currentBloc = new WikiRendererBloc($this);
+      $this->errors=array();
+      $this->_currentBloc = null;
 
       // parcours de l'ensemble des lignes du texte
       foreach($lignes as $num=>$ligne){
-
-         if($ligne == '') { // pas de trim à cause des pre
-            // ligne vide
-            $this->_closeBloc();
-         }else{
-
-            // detection de debut de bloc (liste, tableau, hr, titre)
-            foreach($this->_blocList as $bloc){
-               if($bloc->detect($ligne))
-                  break;
-            }
-
-            // c'est le debut d'un bloc (ou ligne d'un bloc en cours)
-            if($bloc->type != $this->_currentBloc->type){
-               $this->_closeBloc(); // on ferme le precedent si c'etait un different
-               $this->_currentBloc= $bloc;
-               if($this->_openBloc()){
-                  $this->_newtext[]=$this->_currentBloc->getRenderedLine();
-               }else{
-                  $this->_newtext[]=$this->_currentBloc->getRenderedLine();
-                  $this->_newtext[]=$this->_currentBloc->close();
-                  $this->_isBlocOpen = false;
-                  $this->_currentBloc = new WikiRendererBloc($this);
-               }
-
+         if($this->_currentBloc){
+            // un bloc est déjà ouvert
+            if($this->_currentBloc->detect($ligne)){
+                $s =$this->_currentBloc->getRenderedLine();
+                if($s !== false)
+                    $this->_newtext[]=$s;
             }else{
-               $this->_currentBloc->_detectMatch=$bloc->_detectMatch;
-               $this->_newtext[]=$this->_currentBloc->getRenderedLine();
-            }
-            if($this->inlineParser->error){
-               $this->errors[$num+1]=$ligne;
+                $this->_newtext[count($this->_newtext)-1].=$this->_currentBloc->close();
+                $found=false;
+                foreach($this->_blocList as $bloc){
+                    if($bloc->type != $this->_currentBloc->type && $bloc->detect($ligne)){
+                        $found=true;
+                        // on ouvre le nouveau
+
+                        if($bloc->closeNow()){
+                            // si on doit fermer le nouveau maintenant, on le ferme
+                            $this->_newtext[]=$bloc->open().$bloc->getRenderedLine().$bloc->close();
+                            $this->_currentBloc = null;
+                        }else{
+                            $this->_currentBloc = $bloc; // attention, il faut une copie !
+                            $this->_newtext[]=$this->_currentBloc->open().$this->_currentBloc->getRenderedLine();
+                        }
+                        break;
+                    }
+                }
+                if(!$found){
+                   $this->_newtext[]= $this->inlineParser->parse($ligne);
+                   $this->_currentBloc = null;
+                }
             }
 
+         }else{
+            $found=false;
+            // pas de bloc ouvert, on test avec tout les blocs.
+            foreach($this->_blocList as $bloc){
+                if($bloc->detect($ligne)){
+                    $found=true;
+                    if($bloc->closeNow()){
+                        $this->_newtext[]=$bloc->open().$bloc->getRenderedLine().$bloc->close();
+                    }else{
+                        $this->_currentBloc = $bloc; // attention, il faut une copie !
+                        $this->_newtext[]=$this->_currentBloc->open().$this->_currentBloc->getRenderedLine();
+                    }
+                    break;
+                }
+            }
+            if(!$found){
+                $this->_newtext[]= $this->inlineParser->parse($ligne);
+            }
          }
-
-
+         if($this->inlineParser->error){
+            $this->errors[$num+1]=$ligne;
+         }
       }
-      $this->_closeBloc();
-      return implode("\n",$this->_newtext);
-   }
-
-
-   /**
-    * ferme un bloc
-    * @access private
-    */
-   function _closeBloc(){
-      if($this->_isBlocOpen){
-         $this->_isBlocOpen=false;
-         $this->_newtext[]=$this->_currentBloc->close();
-         $this->_currentBloc = new WikiRendererBloc($this);
+      if($this->_currentBloc){
+          $this->_newtext[count($this->_newtext)-1].=$this->_currentBloc->close();
       }
+
+      return $this->config->onParse(implode("\n",$this->_newtext));
    }
 
-   /**
-    * ouvre un bloc et le referme eventuellement suivant sa nature
-    * @return boolean  indique si le bloc reste ouvert ou pas
-    * @access private
-    */
-   function _openBloc(){
-      if(!$this->_isBlocOpen){
-         $this->_newtext[]=$this->_currentBloc->open();
-         $this->_isBlocOpen=true;
-         return !$this->_currentBloc->closeNow();
-      }else
-         return true;
-   }
+    /**
+     * renvoi la version de wikirenderer
+     * @access public
+     * @return string   version
+     */
+    function getVersion(){
+       return WIKIRENDERER_VERSION;
+    }
+
+    function & getConfig(){
+        return $this->config;
+    }
 
 }
-
 
 ?>

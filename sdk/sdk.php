@@ -129,7 +129,7 @@ function ParseIniFile($strFileName)
 	{
 		Error('Fichier de configuration manquant ' . $strFileName);
 	}
-	
+
 	$strContent = implode("", file($strFileName));
 	$astrLines = explode("\n", $strContent);
 
@@ -148,7 +148,7 @@ function ParseIniFile($strFileName)
 		{
 			$strName = trim(substr($strLine, 0, $nMiddle));
 			$strValue = trim(substr($strLine, $nMiddle + 1));
-
+			
 			$aVars[$strName] = xhtmlspecialchars($strValue);
 		}
 	}
@@ -300,7 +300,6 @@ function GetScriptURI($strScriptName)
 	return $k_strWikiURI . $k_aConfig[$strScriptName . 'Script'] . GetPageSeparator();
 }
 
-
 // Merci à Darken pour cette fonction
 function VerifyUtf8($str)
 {
@@ -391,7 +390,7 @@ function VerifyUtf8($str)
 
 function LoadFile($strFilePath)
 {
-	global $ChuFile;
+	global $k_aConfig, $ChuFile;
 	if ( !is_file($strFilePath) )
 	{
 		return '';
@@ -400,11 +399,13 @@ function LoadFile($strFilePath)
 	$strContent = implode('', $ChuFile($strFilePath));
 	$strContent = str_replace("\r", '', $strContent);
 
-	if( !VerifyUtf8($strContent) )
+	if( @$k_aConfig['VerifyUtf8'] == 'true' )
 	{
-		Error('Le fichier ' . $strFilePath . ' n\'est pas correctement enregistré en UTF-8');
-	}
-	
+		if( !VerifyUtf8($strContent) )
+		{
+			Error('Le fichier ' . $strFilePath . ' n\'est pas correctement enregistré en UTF-8');
+		}
+	}	
 	return $strContent;
 }
 
@@ -532,16 +533,15 @@ function Render($strWikiContent)
 	{
 	case 'WikiRenderer':
 		require_once(dirname(__FILE__) . '/WikiRenderer/WikiRenderer.lib.php');
-		require_once(dirname(__FILE__) . '/WikiRenderer/WikiRenderer_chu.conf.php');
+		require_once(dirname(__FILE__) . '/WikiRenderer/rules/chu_to_xhtml.php');
 
-		$Config = new ChuWikiConfig();
-		$Renderer = new WikiRenderer($Config);
-		$strHtmlContent = $Renderer->Render($strWikiContent);
+		$Renderer = new WikiRenderer('chu_to_xhtml');
+		$strHtmlContent = $Renderer->render($strWikiContent);
 		break;
 
 	case 'wiki2xhtml':
-		require_once(dirname(__FILE__) . '/wiki2xhtml/class.wiki2xhtml.php');
-		$Renderer = new wiki2xhtml();
+		require_once(dirname(__FILE__) . '/wiki2xhtml/class.wiki2xhtml.chu.php');
+		$Renderer = new wiki2xhtmlChu();
 		$strHtmlContent = $Renderer->transform($strWikiContent);
 		break;
 
@@ -870,7 +870,7 @@ function WriteXhtmlHeader()
 	if ( @stristr($_SERVER['HTTP_ACCEPT'], 'application/xhtml+xml') ) 
 	{
 		header('Content-type: application/xhtml+xml; charset=' . $strCharset);
-		echo '<?xml version="1.0" encoding="' . $strCharset . '"?>' . "\n";
+		echo '<?xml version="1.0" encoding="' . $strCharset . '"?' .'>' . "\n";
 	}
 	else 
 	{

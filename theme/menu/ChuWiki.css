@@ -99,7 +99,6 @@ a[hreflang]::after{
 #Logo
 {
     font-size: 2em;
-    float: right;
     color: #999;
     line-height: 1em;
     margin: 0;
@@ -126,6 +125,7 @@ h3
 
 /* Barre d'outils
 ************************************************************/
+/*
 #UtilsSeparator
 {
 	display: none;
@@ -140,7 +140,8 @@ h3
 	-moz-border-radius: 5px;
 	position: absolute;
 	font-size: 90%;
-	top: 4em;
+	right: 1em;
+	top: 2em;
 }
 
 #Utils li{
@@ -160,17 +161,50 @@ h3
 	color: #000;
 	background: #EEE url(../default/gfx/tbh.png) repeat-x;
 }
+*/
+#UtilsSeparator
+{
+	display: none;
+}
+
+#Utils{
+	position: absolute;
+	font-size: 90%;
+	padding: 5px 0;
+	right: 1em;
+	top: 1em;
+}
+
+#Utils li{
+	display: inline;
+	padding: 4px 0;
+}
+
+#Utils li a{
+	border: 1px solid #666;
+	-moz-border-radius: 5px 5px 4px 4px;
+	background: #F2F2F2 url(../default/gfx/tb.png) repeat-x;
+	padding: 4px 8px;
+	color: #333;
+	text-decoration: none;
+}
+
+#Utils li a:hover{
+	color: #000;
+	background: #EEE url(../default/gfx/tbh.png) repeat-x;
+	border-color: #000;
+}
 
 /* Contenu
 ************************************************************/
 #Content
 {
+	float: right;
 	background: #fff;
 	color: #000;
 	border: 1px solid #CCC;
 	padding: 1em;
-	margin: 3.5em 0 1em 0;
-    float: right;
+	margin: 0.5em 0 1em 0ex;
 	width: 75%;
 }
 
@@ -182,10 +216,9 @@ h3
 ************************************************************/
 #Menu
 {
+	margin: 0.5em 0 0 0;
 	padding: 0;
-	margin: 4.5em 0 0 0;
     width: 20%;
-    float: left;
 	font-size: 90%;
 }
 #Menu ul
