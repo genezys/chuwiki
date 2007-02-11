@@ -26,6 +26,8 @@ require(dirname(__FILE__) . '/class.wiki2xhtml.basic.php');
 
 class wiki2xhtmlChu extends wiki2xhtmlBasic
 {
+	var $bInCode = false;
+
 	function wiki2xhtmlChu()
 	{
 		parent::wiki2xhtml();
@@ -168,14 +170,32 @@ class wiki2xhtmlChu extends wiki2xhtmlBasic
 				$line = trim($cap[2]);
 			}
 		}
+		# Préformaté avec code de début et de fin
+		elseif ($this->getOpt('active_pre') && !$this->bInCode && preg_match('/^\\s*{{{(.*)/',$line,$cap) )
+		{
+			$type = 'pre';
+			$line = $cap[1];
+			$this->bInCode = true;
+		}
+		elseif ($this->getOpt('active_pre') && $this->bInCode && preg_match('/(.*)}}}\s*$/',$line,$cap) )
+		{
+			$type = 'pre';
+			$line = $cap[1];
+			$this->bInCode = false;
+		}
+		elseif( $this->bInCode )
+		{
+			$type = 'pre';
+		}
 		# Préformaté
-		elseif ($this->getOpt('active_pre') && preg_match('/^[ ]{1}(.*)$/',$line,$cap))
+		elseif ($this->getOpt('active_pre') && preg_match('/^[ ]{1}(.*)$/',$line,$cap) )
 		{
 			$type = 'pre';
 			$line = $cap[1];
 		}
 		# Paragraphe
-		else {
+		else 
+		{
 			$type = 'p';
 			$line = trim($line);
 		}
@@ -285,6 +305,10 @@ class wiki2xhtmlChu extends wiki2xhtmlBasic
 			}
 			return $res;
 		}
+		else if( $type == 'pre' )
+		{
+			return NULL;
+		}
 		else
 		{
 			return "\n";
@@ -319,7 +343,7 @@ class wiki2xhtmlChu extends wiki2xhtmlBasic
 			
 			$res .= $this->__closeLine($type,$mode,$pre_type,$pre_mode);
 			$res .= $this->__openLine($type,$mode,$pre_type,$pre_mode);
-			
+						
 			# P dans les blockquotes
 			if ($type == 'blockquote' && trim($line) == '' && $pre_type == $type) {
 				$res .= "</p>\n<p>";
@@ -337,6 +361,11 @@ class wiki2xhtmlChu extends wiki2xhtmlBasic
 			if ( $type == 'deflist' )
 			{
 				$res .= '<dt>' . $line[0] . '</dt><dd>' . $line[1] . '</dd>';
+			}
+			elseif ( $type == 'pre' && $pre_type == 'pre' )
+			{
+				$res .= $line;
+				$res .= "\n";
 			}
 			else
 			{

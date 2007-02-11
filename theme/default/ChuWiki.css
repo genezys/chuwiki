@@ -199,6 +199,10 @@ textarea, select{
 #Rules dt
 {
     margin-top: 1em;
+}
+
+#Rules dt code
+{
     color: #191;
 }
 

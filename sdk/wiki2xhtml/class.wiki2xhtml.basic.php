@@ -421,7 +421,7 @@ class wiki2xhtmlBasic
 			
 			$res .= $this->__closeLine($type,$mode,$pre_type,$pre_mode);
 			$res .= $this->__openLine($type,$mode,$pre_type,$pre_mode);
-			
+
 			# P dans les blockquotes
 			if ($type == 'blockquote' && trim($line) == '' && $pre_type == $type) {
 				$res .= "</p>\n<p>";
@@ -435,7 +435,7 @@ class wiki2xhtmlBasic
 				$line = preg_replace('/[ ]+(»)/','&nbsp;$1',$line);
 				$line = preg_replace('/(«)[ ]+/','$1&nbsp;',$line);
 			}
-			
+
 			$res .= $line;
 		}
 		
