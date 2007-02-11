@@ -1,0 +1,7 @@
+# Afin de ne pas spécifier l'extension des fichiers dans les URI
+Options +MultiViews
+
+# Protection des fichiers utilisés seulement par PHP
+<FilesMatch configuration\.ini|sdk|pages>
+	Deny from all
+</FilesMatch>
