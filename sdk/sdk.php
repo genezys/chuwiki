@@ -182,20 +182,9 @@ function GetUriInfo()
 	// le script, le séparateur de page, et la page
 	// Il faut extraire le script et la page	
 
-	// Sans PathInfo
-	if( $k_aConfig['UsePathInfo'] != 'true' )
-	{
-		$strPage = urldecode($_SERVER['QUERY_STRING']);
-	}
-	// Avec PathInfo
-	else if ( isset($_SERVER['PATH_INFO']) )
-	{
-		$strPage = substr($_SERVER['PATH_INFO'], 1);
-	}
-
-	$nStart = strrpos($_SERVER['REQUEST_URI'], $strPage);
-	$strScript = substr($_SERVER['REQUEST_URI'], 0, $nStart);
-
+	$strScript = $_SERVER['SCRIPT_NAME'];
+	$strPage = urldecode(substr($_SERVER['REQUEST_URI'], strlen($strScript) + 1));
+	
 	$strSeparator = GetPageSeparator();
 	$nSeparatorLength = strlen($strSeparator);
 	if( substr($strScript, -$nSeparatorLength) != $strSeparator )
