@@ -130,7 +130,8 @@ h3
 	display: none;
 }
 
-#Utils{
+#Utils
+{
 	position: absolute;
 	font-size: 90%;
 	padding: 5px 0;
@@ -234,6 +235,7 @@ textarea, select{
 	width: 100%;
 	font-family: Trebuchet MS, Geneva, Arial, Helvetica, sans-serif;
 	font-size: 90%;
+	border: 1px solid #ccc;
 }
 
 #Rules
