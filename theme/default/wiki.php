@@ -28,7 +28,7 @@
 <head>
 <title>&Config.Title;&Lang.WikiTitle; &Page.Name;</title>
 <meta name="Generator" content="&Config.Version;"/>
-<?php include('styleswitcher.php') ?>
+<link rel="stylesheet" type="text/css" title="ChuWiki" href="&Config.URI;theme/default/ChuWiki.css"/>
 </head>
 
 <body>

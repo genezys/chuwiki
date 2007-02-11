@@ -125,43 +125,6 @@ h3
 
 /* Barre d'outils
 ************************************************************/
-/*
-#UtilsSeparator
-{
-	display: none;
-}
-
-#Utils{
-	padding: 4px 8px;
-	margin: 1em 0;
-	background: #F2F2F2 url(../default/gfx/tb.png) repeat-x;
-	color: #000;
-	border: 1px solid #CCC;
-	-moz-border-radius: 5px;
-	position: absolute;
-	font-size: 90%;
-	right: 1em;
-	top: 2em;
-}
-
-#Utils li{
-	padding: 4px 0;
-	display: inline;
-	border-left: 1px solid #CCC;
-	border-right: 1px solid #CCC;
-}
-
-#Utils li a{
-	padding: 4px 8px;
-	color: #333;
-	text-decoration: none;
-}
-
-#Utils li a:hover{
-	color: #000;
-	background: #EEE url(../default/gfx/tbh.png) repeat-x;
-}
-*/
 #UtilsSeparator
 {
 	display: none;
