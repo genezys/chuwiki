@@ -36,11 +36,10 @@ body
 	font-size: 90%;
 	margin: 1em;
 	padding: 0;
-	max-width: 90em;
-
 }
 
-code, pre{
+code, pre
+{
 	font-family: monospace;
 	font-size: 1.2em;
 }
@@ -135,6 +134,7 @@ h3
 	position: absolute;
 	font-size: 90%;
 	padding: 5px 0;
+	margin: 0;
 	right: 1em;
 	top: 1em;
 }
