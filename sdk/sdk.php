@@ -185,9 +185,6 @@ function GetUriInfo()
 	$strScriptName = $_SERVER['SCRIPT_NAME'];
 	$strScript = substr($_SERVER['REQUEST_URI'], 0, strlen($strScriptName));
 
-	var_dump($strScriptName);
-	var_dump($strScript);
-
 	if( $strScript != $strScriptName )
 	{
 		// SCRIPT_NAME may contains the extension when it should not
@@ -197,10 +194,6 @@ function GetUriInfo()
 	}
 
 	$strPage = urldecode(substr($_SERVER['REQUEST_URI'], strlen($strScript) + 1));
-
-	var_dump($strScript);
-	var_dump($strPage);
-	die();
 
 	$strSeparator = GetPageSeparator();
 	$nSeparatorLength = strlen($strSeparator);
