@@ -182,9 +182,26 @@ function GetUriInfo()
 	// le script, le séparateur de page, et la page
 	// Il faut extraire le script et la page	
 
-	$strScript = $_SERVER['SCRIPT_NAME'];
+	$strScriptName = $_SERVER['SCRIPT_NAME'];
+	$strScript = substr($_SERVER['REQUEST_URI'], 0, strlen($strScriptName));
+
+	var_dump($strScriptName);
+	var_dump($strScript);
+
+	if( $strScript != $strScriptName )
+	{
+		// SCRIPT_NAME may contains the extension when it should not
+		// Remove it
+		$nLastDotPos = strrpos($strScriptName, '.');
+		$strScript = substr($strScriptName, 0, -$nLastDotPos + 1);
+	}
+
 	$strPage = urldecode(substr($_SERVER['REQUEST_URI'], strlen($strScript) + 1));
-	
+
+	var_dump($strScript);
+	var_dump($strPage);
+	die();
+
 	$strSeparator = GetPageSeparator();
 	$nSeparatorLength = strlen($strSeparator);
 	if( substr($strScript, -$nSeparatorLength) != $strSeparator )
