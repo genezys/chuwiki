@@ -58,11 +58,12 @@ else
 ///////////////////////////////////////////////////////////////////
 
 // Construction de l'URI où est installé ChuWiki
-$k_strWikiURI = dirname($_SERVER['SCRIPT_NAME']) . '/';
-if ( $k_strWikiURI == '//' || $k_strWikiURI == './' )
+$k_strWikiURI = dirname($_SERVER['SCRIPT_NAME']);
+if ( strlen($k_strWikiURI) < 2 )
 {
-	$k_strWikiURI = '/';
+	$k_strWikiURI = '';
 }
+$k_strWikiURI .= '/';
 
 /////////////////////////////////////////////////////////////////////////////////
 // Retourne un NCR avec le & changé en 0x00
@@ -175,8 +176,6 @@ function GetLangVar($strVarName)
 function GetUriInfo()
 {
 	global $k_aConfig;
-
-	$strPage = '';
 
 	// L'URI peut être composée de 3 parties :
 	// le script, le séparateur de page, et la page
