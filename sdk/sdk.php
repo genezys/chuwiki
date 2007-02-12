@@ -24,7 +24,7 @@
 
 error_reporting(E_ALL);
 
-$k_strVersion = 'ChuWiki 1.3α';
+$k_strVersion = 'ChuWiki 1.3';
 
 // Chargement des configuration
 $k_aConfig = ParseIniFile(dirname(__FILE__) . '/../configuration.ini');
