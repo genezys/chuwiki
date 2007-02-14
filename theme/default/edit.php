@@ -42,7 +42,7 @@
 
 <form method="post" action="">
 <div>
-<textarea id="Wiki" name="Wiki" cols="80" rows="40">&Page.Wiki;</textarea>
+<textarea id="Wiki" name="Wiki" cols="80" rows="30">&Page.Wiki;</textarea>
 </div>
 <p id="PPreviewSave"><input type="submit" id="Preview" name="Preview" value="&Lang.Preview;" accesskey="p"/><input type="submit" id="Save" name="Save" value="&Lang.Save;" accesskey="s"/></p>
 </form>
