@@ -189,7 +189,7 @@ function GetUriInfo()
 		// SCRIPT_NAME may contains the extension when it should not
 		// Remove it
 		$nLastDotPos = strrpos($strScriptName, '.');
-		$strScript = substr($strScriptName, 0, -$nLastDotPos + 1);
+		$strScript = substr($strScriptName, 0, $nLastDotPos);
 	}
 
 	$strPage = urldecode(substr($_SERVER['REQUEST_URI'], strlen($strScript) + 1));
