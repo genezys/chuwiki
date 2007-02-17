@@ -102,8 +102,20 @@ class wiki2xhtmlChu extends wiki2xhtmlBasic
 		
 		$line = htmlspecialchars($this->T[$i],ENT_NOQUOTES);
 		
+		# Fin d'un bloc préformaté
+		if( $this->bInCode && preg_match('/(.*)}}}\s*$/',$line,$cap) )
+		{
+			$type = 'pre';
+			$line = $cap[1];
+			$this->bInCode = false;
+		}
+		# Déjà dans un bloc de code
+		elseif( $this->bInCode )
+		{
+			$type = 'pre';
+		}
 		# Ligne vide
-		if (empty($line))
+		else if (empty($line))
 		{
 			$type = NULL;
 		}
@@ -170,22 +182,12 @@ class wiki2xhtmlChu extends wiki2xhtmlBasic
 				$line = trim($cap[2]);
 			}
 		}
-		# Préformaté avec code de début et de fin
+		# Début d'un bloc préformaté
 		elseif ($this->getOpt('active_pre') && !$this->bInCode && preg_match('/^\\s*{{{(.*)/',$line,$cap) )
 		{
 			$type = 'pre';
 			$line = $cap[1];
 			$this->bInCode = true;
-		}
-		elseif ($this->getOpt('active_pre') && $this->bInCode && preg_match('/(.*)}}}\s*$/',$line,$cap) )
-		{
-			$type = 'pre';
-			$line = $cap[1];
-			$this->bInCode = false;
-		}
-		elseif( $this->bInCode )
-		{
-			$type = 'pre';
 		}
 		# Préformaté
 		elseif ($this->getOpt('active_pre') && preg_match('/^[ ]{1}(.*)$/',$line,$cap) )
@@ -305,10 +307,6 @@ class wiki2xhtmlChu extends wiki2xhtmlBasic
 			}
 			return $res;
 		}
-		else if( $type == 'pre' )
-		{
-			return NULL;
-		}
 		else
 		{
 			return "\n";
@@ -362,11 +360,11 @@ class wiki2xhtmlChu extends wiki2xhtmlBasic
 			{
 				$res .= '<dt>' . $line[0] . '</dt><dd>' . $line[1] . '</dd>';
 			}
-			elseif ( $type == 'pre' && $pre_type == 'pre' )
-			{
-				$res .= $line;
-				$res .= "\n";
-			}
+//			elseif ( $type == 'pre' && $pre_type == 'pre' )
+//			{
+//				$res .= $line;
+//				$res .= "\n";
+//			}
 			else
 			{
 				$res .= $line;
