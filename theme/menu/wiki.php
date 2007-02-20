@@ -26,9 +26,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="&Lang.Code;" xml:lang="&Lang.Code;">
 <head>
 <title>&Config.Title;&Lang.WikiTitle; &Page.Name;</title>
-<meta name="robots" content="noindex,nofollow"/>
 <meta name="Generator" content="&Config.Version;"/>
-<link rel="stylesheet" type="text/css" title="ChuWiki" href="&Config.URI;theme/menu/ChuWiki.css"/>
+<link rel="stylesheet" type="text/css" title="ChuWiki" href="&Config.URI;&Config.ThemePath;/ChuWiki.css"/>
 </head>
 
 <body>

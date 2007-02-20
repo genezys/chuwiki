@@ -28,7 +28,7 @@
 <title>&Config.Title; &Lang.HistoryTitle; &Page.Name;</title>
 <meta name="robots" content="noindex,nofollow"/>
 <meta name="Generator" content="&Config.Version;"/>
-<link rel="stylesheet" type="text/css" title="ChuWiki" href="&Config.URI;theme/default/ChuWiki.css"/>
+<link rel="stylesheet" type="text/css" title="ChuWiki" href="&Config.URI;&Config.ThemePath;/ChuWiki.css"/>
 </head>
 
 <body>
