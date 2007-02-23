@@ -60,5 +60,6 @@
 	<li><a href="&Config.EditURI;&Page.Name;#Wiki">&Lang.Edit;</a></li>
 	<li><a href="&Config.WikiURI;&Page.Name;">&Lang.Back;</a></li>
 </ul>
+
 </body>
 </html>

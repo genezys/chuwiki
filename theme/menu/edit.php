@@ -63,6 +63,7 @@
 	<li><a href="&Config.WikiURI;&Lang.ChangesPage;">&Lang.ChangesPage;</a></li>
 	<li><a href="&Config.WikiURI;&Page.Name;">&Lang.Back;</a></li>
 	<li><a href="&Config.HistoryURI;&Page.Name;">&Lang.History;</a></li>
+
 </ul>
 
 </body>
