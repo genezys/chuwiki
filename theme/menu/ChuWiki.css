@@ -105,6 +105,12 @@ a[hreflang]::after{
     margin: 0;
 }
 
+#Logo a
+{
+    color: #999;
+	text-decoration: none;
+}
+
 h1
 {
 	font-family: "Trebuchet MS", Verdana, "Bitstream Vera Sans", sans-serif;
@@ -174,7 +180,8 @@ h3
 	width: 75%;
 }
 
-#Content.Preview{
+#Content.Preview
+{
 	background: #FFF url(../default/gfx/preview.png) no-repeat right top;
 }
 

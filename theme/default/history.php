@@ -32,22 +32,20 @@
 </head>
 
 <body>
-<p id="Logo">&Config.Title;</p>
+<p id="Logo"><a href="&Config.WikiURI;&Lang.DefaultPage;">&Config.Title;</a></p>
 
 <h1>&Lang.HistoryTitle; &Page.Name;</h1>
 
 <div id="Content">
-&Page.Html;
-</div>
-
 <form method="post" action="">
-<div>
 <select name="Date" id="Date" size="10">
 &Page.History;
 </select>
-</div>
 <p id="PPreviewSave"><input type="submit" id="Preview" name="Preview" value="&Lang.Preview;" accesskey="p"/><input type="submit" id="Save" name="Save" value="&Lang.Restore;" accesskey="s"/></p>
 </form>
+
+&Page.Html;
+</div>
 
 <hr id="UtilsSeparator"/>
 <ul id="Utils">
@@ -57,6 +55,5 @@
 	<li><a href="&Config.EditURI;&Page.Name;#Wiki">&Lang.Edit;</a></li>
 	<li><a href="&Config.WikiURI;&Page.Name;">&Lang.Back;</a></li>
 </ul>
-
 </body>
 </html>

@@ -32,7 +32,7 @@
 </head>
 
 <body>
-<p id="Logo">&Config.Title;</p>
+<p id="Logo"><a href="&Config.WikiURI;&Lang.DefaultPage;">&Config.Title;</a></p>
 
 <h1>&Lang.EditTitle; &Page.Name;</h1>
 
@@ -49,7 +49,7 @@
 <div>
 <textarea id="Wiki" name="Wiki" cols="80" rows="30">&Page.Wiki;</textarea>
 </div>
-<p id="PPreviewSave"><input type="submit" id="Preview" name="Preview" value="&Lang.Preview;" accesskey="p"/><input type="submit" id="Save" name="Save" value="&Lang.Save;" accesskey="s"/></p>
+<p id="PPreviewSave"><input type="submit" id="Preview" name="Preview" value="&Lang.Preview;" accesskey="p"/> <input type="submit" id="Save" name="Save" value="&Lang.Save;" accesskey="s"/></p>
 </form>
 
 <div id="Rules">
@@ -62,7 +62,7 @@
 	<li><a href="&Config.WikiURI;&Lang.ListPage;">&Lang.ListPage;</a></li>
 	<li><a href="&Config.WikiURI;&Lang.ChangesPage;">&Lang.ChangesPage;</a></li>
 	<li><a href="&Config.WikiURI;&Page.Name;">&Lang.Back;</a></li>
-	<li><a href="&Config.HistoryURI;&Page.Name;#Date">&Lang.History;</a></li>
+	<li><a href="&Config.HistoryURI;&Page.Name;">&Lang.History;</a></li>
 </ul>
 
 </body>
