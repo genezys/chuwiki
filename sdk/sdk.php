@@ -173,6 +173,20 @@ function GetLangVar($strVarName)
 	return $k_aLangConfig[$strVarName];
 }
 
+function GetPostedValue($strName)
+{
+	$strValue = @$_POST[$strName];
+	if ( get_magic_quotes_gpc() )
+	{
+		$strValue = stripslashes($strValue);
+	}
+
+	// Saloperie d'\r
+	$strValue = str_replace("\r", '', $strValue);
+
+	return $strValue;
+}
+
 function GetUriInfo()
 {
 	global $k_aConfig;
@@ -249,9 +263,9 @@ function GetCurrentPage()
 	}
 
 	// Si la page contient des caractères invalides, on les remplace par des tirets et on redirige
-	if ( strstr($strPage, '/') !== FALSE || strstr($strPage, '"') !== FALSE )
+	if ( strstr($strPage, '/') !== FALSE )
 	{
-		$aBads = array('/', '"');
+		$aBads = array('/');
 		$strPage = str_replace($aBads, '-', $strPage);
 	
 		header('Location: ' . $strScript .  $strPage);
@@ -837,7 +851,15 @@ function GetRecentChangeContent()
 
 function GetSearchContent($strQuery)
 {
+	if( isset($_POST['Search']) )
+	{
+		$strLocation = GetScriptURI('Wiki') . GetLangVar('SearchPage') . ' ' . GetPostedValue('Search');
+		header('Location: ' . $strLocation);
+		exit;
+	}
+
 	$strQuery = trim(strtolower($strQuery));
+	
 	if( strlen($strQuery) == 0 )
 	{
 		return '';

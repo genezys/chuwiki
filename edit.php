@@ -25,33 +25,18 @@
 require(dirname(__FILE__) . '/sdk/sdk.php');
 /////////////////////////////////////////////////////////////
 
-function GetPostedWiki()
-{
-	$strWikiContent = $_POST['Wiki'];
-	if ( get_magic_quotes_gpc() )
-	{
-		$strWikiContent = stripslashes($strWikiContent);
-	}
-
-	// Saloperie d'\r
-	$strWikiContent = str_replace("\r", '', $strWikiContent);
-
-	return $strWikiContent;
-}
-/////////////////////////////////////////////////////////////
-
 // Chargement des informations de la page
 $strPage = GetCurrentPage();
 
-if ( isset($_POST['Preview']) )
+if( isset($_POST['Preview']) )
 {
 	// En mode preview
-	$strWikiContent = GetPostedWiki();
+	$strWikiContent = GetPostedValue('Preview');
 }
-else if ( isset($_POST['Save']) )
+else if( isset($_POST['Save']) )
 {
 	// En mode sauvegarde
-	$strWikiContent = GetPostedWiki();
+	$strWikiContent = GetPostedValue('Save');
 	
 	// Enregistrement de la page
 	Save($strPage, $strWikiContent);

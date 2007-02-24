@@ -25,18 +25,9 @@
 require(dirname(__FILE__) . '/sdk/sdk.php');
 /////////////////////////////////////////////////////////////
 
-function GetPostDate()
-{
-	if ( !isset($_POST['Date']) )
-	{
-		return '';
-	}
-	return $_POST['Date'];
-}
-
 // Chargement des informations de la page
 $strPage = GetCurrentPage();
-$strDate = GetPostDate();
+$strDate = GetPostedValue('Date');
 
 if ( isset($_POST['Preview']) )
 {
@@ -71,7 +62,7 @@ $strHtmlContent = Render($strModifiedWikiContent);
 $aHistory = GetHistory($strPage);
 
 // Contruction de la liste des historiques avec sélection de la date choisie
-$datePost = GetPostDate();
+$datePost = GetPostedValue('Date');
 if ( $datePost == '')
 {
 	$datePost = reset($aHistory);

@@ -21,24 +21,15 @@
 //
 // ***** END LICENSE BLOCK *****
 ////////////////////////////////////////////////////////////////////////////////
+require('theme.php');
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="&Lang.Code;" xml:lang="&Lang.Code;">
-<head>
-<title>&Config.Title; &Lang.EditTitle; &Page.Name;</title>
-<meta name="robots" content="noindex,nofollow"/>
-<meta name="Generator" content="&Config.Version;"/>
-<link rel="stylesheet" type="text/css" title="ChuWiki" href="&Config.URI;&Config.ThemePath;/ChuWiki.css"/>
-</head>
-
-<body>
-<p id="Logo"><a href="&Config.WikiURI;&Lang.DefaultPage;">&Config.Title;</a></p>
-
-<h1>&Lang.EditTitle; &Page.Name;</h1>
+<?php BeginDocument('edit') ?>
 
 <div id="Content" class="Preview">
 &Page.Html;
 </div>
+
+<?php WriteMenu() ?>
 
 <form method="post" action="#">
 <div>
@@ -51,14 +42,4 @@
 &Lang.Rules;
 </div>
 
-<hr id="UtilsSeparator"/>
-<ul id="Utils">
-	<li><a href="&Config.WikiURI;&Lang.DefaultPage;">&Lang.DefaultPage;</a></li>
-	<li><a href="&Config.WikiURI;&Lang.ListPage;">&Lang.ListPage;</a></li>
-	<li><a href="&Config.WikiURI;&Lang.ChangesPage;">&Lang.ChangesPage;</a></li>
-	<li><a href="&Config.WikiURI;&Page.Name;">&Lang.Back;</a></li>
-	<li><a href="&Config.HistoryURI;&Page.Name;">&Lang.History;</a></li>
-</ul>
-
-</body>
-</html>
+<?php EndDocument('edit') ?>

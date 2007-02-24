@@ -152,7 +152,8 @@ h3
 	padding: 4px 0;
 }
 
-#Utils li a{
+#Utils li a
+{
 	border: 1px solid #666;
 	-moz-border-radius: 5px 5px 4px 4px;
 	background: #F2F2F2 url(../default/gfx/tb.png) repeat-x;
@@ -167,20 +168,91 @@ h3
 	border-color: #000;
 }
 
+#Search
+{
+	display: inline;
+}
+
+#Search input
+{
+	border: 1px solid #000;
+	background: #fff;
+	color: #000;
+	margin: 0 0.5ex;
+	padding: 4px 8px;
+}
+
+#Search .Button
+{
+	border: 1px solid #666;
+	-moz-border-radius: 5px 5px 4px 4px;
+	background: #F2F2F2 url(../default/gfx/tb.png) repeat-x;
+	padding: 4px 8px;
+	color: #333;
+}
+
 /* Contenu
 ************************************************************/
 #Content
 {
+	float: right;
 	background: #fff;
 	color: #000;
 	border: 1px solid #CCC;
 	padding: 1em;
-	margin: 1em 0;
+	margin: 0.5em 0 1em 0ex;
+	width: 75%;
 }
 
 #Content.Preview
 {
 	background: #FFF url(../default/gfx/preview.png) no-repeat right top;
+}
+
+/* Menu
+************************************************************/
+#Menu
+{
+	margin: 0.5em 0 0 0;
+	padding: 0;
+    width: 20%;
+	font-size: 80%;
+}
+#Menu ul
+{
+	background: #fff;
+	border: 1px solid #CCC;
+	color: #000;
+	padding: 0.5em 0;
+	margin: 0 0 1em 0;
+}
+#Menu li
+{
+	display: inline;
+}
+#Menu li a
+{
+	display: block;
+	padding: 0.2em 1ex;
+}
+#Menu li a:hover
+{
+	color: #000;
+	background: #eee;
+}
+
+#Menu h2
+{
+	background: #F2F2F2 url(../default/gfx/tb.png) repeat-x;
+	font-size: 1.2em;
+	text-align: center;
+	border-bottom: 0;
+	padding: 0 8px;
+	margin: 0;
+    color: #000;
+	text-decoration: none;
+	border: 1px solid #CCC;
+	border-bottom: 0;
 }
 
 /* Edit Mode
@@ -227,7 +299,7 @@ textarea, select{
 
 } /* @media screen */
 
-@media print 
+@media print
 {
 
 html, body
@@ -240,7 +312,7 @@ html, body
 	background: #fff;
 }
 
-#Logo, #UtilsSeparator, #Utils
+#Logo, #UtilsSeparator, #Utils, #Menu
 {
 	display: none;
 }
