@@ -835,6 +835,78 @@ function GetRecentChangeContent()
 	return $strContent;
 }
 
+function GetSearchContent($strQuery)
+{
+	$strQuery = trim(strtolower($strQuery));
+	if( strlen($strQuery) == 0 )
+	{
+		return '';
+	}
+
+	$aResults = array();
+	$strContent = '';
+
+	$astrPages = GetPageList();
+	foreach($astrPages as $strPage => $date)
+	{
+		$nScore = 0;
+		$strExtract = '';
+
+		if( $strPage == $strQuery )
+		{
+			$nScore += 20;
+		}
+
+		$strWiki = GetWikiContent($strPage);
+		$astrLines = explode("\n", $strWiki);
+
+		foreach($astrLines as $strLine)
+		{
+			$strLoweredLine = strtolower(trim($strLine));
+			$nTimes = substr_count($strLoweredLine, $strQuery);
+			if( $nTimes == 0 )
+			{
+				continue;
+			}
+
+			$nLineScore = 0;
+			if( substr($strLine, 0, 3) === '!!!' ) 
+			{
+				$nLineScore = 2;
+			} 
+			else if( substr($strLine, 0, 2) === '!!' ) 
+			{
+				$nLineScore = 4;
+			} 
+			else if( substr($strLine, 0, 1) === '!' ) 
+			{
+				$nLineScore = 8;
+			} 
+			else
+			{
+				$nLineScore = 1;
+			}
+
+			$nScore += $nLineScore * $nTimes;
+			$strExtract .= $strLine . "\n\n";
+		}
+
+		if( $nScore !== 0 )
+		{
+			$aResults[$nScore] = $strPage;
+		}
+	}
+
+	krsort($aResults); // on trie la tableau par ordre decroissant de pertinence
+
+	foreach( $aResults as $nScore => $strPage )
+	{
+		$strContent .= '-[' . $strPage . ']' . "\n";
+	}
+
+	return $strContent;
+}
+
 function GetSpecialContent($strPage)
 {
 	global $k_aLangConfig;
@@ -851,6 +923,16 @@ function GetSpecialContent($strPage)
 	if ( $strPage == $k_aLangConfig['ChangesPage'] )
 	{
 		$strSpecial .= GetRecentChangeContent();
+	}
+
+	// Si c'est la page de recherche, on ajoute les résultats après
+	// La requête est passée à la suite du nom de la page
+	$strSearchPage = @$k_aLangConfig['SearchPage'];
+	$nSearchPageLength = strlen($strSearchPage);
+	if( $nSearchPageLength > 0 && substr($strPage, 0, $nSearchPageLength) == $strSearchPage )
+	{
+		$strQuery = substr($strPage, $nSearchPageLength);
+		$strSpecial .= GetSearchContent($strQuery);
 	}
 
 	return $strSpecial;
