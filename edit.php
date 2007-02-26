@@ -31,7 +31,7 @@ $strPage = GetCurrentPage();
 if( isset($_POST['Preview']) )
 {
 	// En mode preview
-	$strWikiContent = GetPostedValue('Preview');
+	$strWikiContent = GetPostedValue('Wiki');
 }
 else if( isset($_POST['Save']) )
 {
