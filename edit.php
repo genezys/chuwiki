@@ -36,7 +36,7 @@ if( isset($_POST['Preview']) )
 else if( isset($_POST['Save']) )
 {
 	// En mode sauvegarde
-	$strWikiContent = GetPostedValue('Save');
+	$strWikiContent = GetPostedValue('Wiki');
 	
 	// Enregistrement de la page
 	Save($strPage, $strWikiContent);
