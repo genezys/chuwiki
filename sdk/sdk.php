@@ -512,6 +512,56 @@ function RenderPage($strPage)
 	return Render($strModifiedWikiContent);
 }
 
+function ProcessWikiContent($strWikiContent)
+{
+	$astrLines = explode("\n", $strWikiContent);
+	
+	$strResult = '';
+
+	// Nous allons essayer de reconnaitre 
+	// quelques syntaxes spécifiques à ChuWiki
+	foreach( $astrLines as $strLine )
+	{
+		$strLine = trim($strLine);
+		
+		if( preg_match('/^::([a-z]+)(.*)?/', $strLine, $astrMatches) != 0 )
+		{
+			$strCommand = $astrMatches[1];
+			$strParams = trim($astrMatches[2]);
+			
+			// Inclusion d'un template
+			if( $strCommand == 'include' )
+			{
+				// Récupère le nom de la page
+				preg_match('/[^|]+/', $strParams, $astrMatches);
+				$strPage = trim($astrMatches[0]);
+
+				// Récupère les paramètres
+				preg_match_all('/\|([^=]+)=([^|]+)/', $strParams, $astrMatches, PREG_SET_ORDER);
+
+				// Récupère le contenu wiki à inclure
+				$strContent = GetWikiContent($strPage);
+
+				// Remplace les paramètres par leur valeur
+				$astrReplacements = array('Vars' => array(), 'Values' => array());
+				foreach( $astrMatches as $astrParams )
+				{
+					$strParam = trim($astrParams[1]);
+					$strValue = trim($astrParams[2]);
+					AddReplacement($astrReplacements, $strParam, $strValue);
+				}
+				$strContent = ReplaceAll($strContent, $astrReplacements);
+				
+				// Inclue le contenu modifié
+				$strResult .= $strContent;
+				continue;
+			}
+		}
+		$strResult .= $strLine . "\n";			
+	}
+	return $strResult;
+}
+
 function Render($strWikiContent)
 {
 	global $k_aConfig, $k_aLangConfig;
@@ -539,6 +589,8 @@ function Render($strWikiContent)
 	{
 		$strWikiContent = $formatter->FormatWiki($strWikiContent);
 	}
+	
+	$strWikiContent = ProcessWikiContent($strWikiContent);
 	
 	// Instanciation de la lib de rendu et rendu wiki
 	switch($k_aConfig['Renderer'])
