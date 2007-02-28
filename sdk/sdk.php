@@ -552,6 +552,9 @@ function ProcessWikiContent($strWikiContent)
 				}
 				$strContent = ReplaceAll($strContent, $astrReplacements);
 				
+				// Gère les commandes dans le contenu inclus
+				$strContent = ProcessWikiContent($strContent);
+
 				// Inclue le contenu modifié
 				$strResult .= $strContent;
 				continue;
