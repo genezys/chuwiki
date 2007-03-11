@@ -147,9 +147,16 @@ h3
 	top: 1em;
 }
 
-#Utils li{
+#Utils li
+{
 	display: inline;
 	padding: 4px 0;
+}
+
+#Utils li p 
+{
+	display: inline;
+	margin: 0;
 }
 
 #Utils li a

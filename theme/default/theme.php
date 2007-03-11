@@ -74,7 +74,7 @@ function EndDocument($strMode)
 		WriteLine('	<li><a href="&Config.HistoryURI;&Page.Name;">&Lang.History;</a></li>');
 	}
 
-	WriteLine('	<li><form id="Search" action="&Config.WikiURI;&Lang.SearchPage;" method="post"><input type="text" name="Search"/><input type="submit" class="Button" value="&Lang.SearchPage;"/></form></li>');
+	WriteLine('	<li><form id="Search" action="&Config.WikiURI;&Lang.SearchPage;" method="post"><p><input type="text" name="Search"/><input type="submit" class="Button" value="&Lang.SearchPage;"/></p></form></li>');
 
 	WriteLine('</ul>');
 	WriteLine('');
