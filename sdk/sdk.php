@@ -557,8 +557,40 @@ function ProcessWikiContent($strWikiContent)
 
 				// Inclue le contenu modifié
 				$strResult .= $strContent;
-				continue;
 			}
+			else if( $strCommand == 'toc' )
+			{
+				$strWikiToc = '';
+				foreach( $astrLines as $strSearchedLine )
+				{
+					if( preg_match('/^(!{1,3}) *(.+)/', $strSearchedLine, $astrMatches) ) 
+					{
+						$nTags = strlen($astrMatches[1]);
+						
+						$strText = trim($astrMatches[2]);
+						$strLink = '';
+
+						if( preg_match('/~([^~]*)~(.*)/', $strText, $astrMatches) )
+						{
+							$strLink = $astrMatches[1];
+							$strText = $astrMatches[2];
+						}
+
+						$strWikiToc .= str_repeat('*', $nTags);
+						if( $strLink == "" )
+						{
+							$strWikiToc .= $strText;
+						}
+						else
+						{
+							$strWikiToc .= '[' . $strText . '|#' . $strLink . ']';
+						}
+						$strWikiToc .= "\n";
+					} 
+				}
+				$strResult .= $strWikiToc;
+			}
+			continue;
 		}
 		$strResult .= $strLine . "\n";			
 	}
@@ -946,24 +978,19 @@ function GetSearchContent($strQuery)
 				continue;
 			}
 
-			$nLineScore = 0;
-			if( substr($strLine, 0, 3) === '!!!' ) 
-			{
-				$nLineScore = 2;
-			} 
-			else if( substr($strLine, 0, 2) === '!!' ) 
-			{
-				$nLineScore = 4;
-			} 
-			else if( substr($strLine, 0, 1) === '!' ) 
-			{
-				$nLineScore = 8;
-			} 
-			else
-			{
-				$nLineScore = 1;
-			}
+			$nLineScore = 1; // 1 by default
 
+			// Better score for titles
+			if( preg_match('/^(!{1,3}).+/', $strLine, $astrMatches) ) 
+			{
+				$nLevel = strlen($astrMatches[1]);
+				switch( $nLevel )
+				{
+				case 1: $nLineScore = 2; break;
+				case 2: $nLineScore = 4; break;
+				case 3: $nLineScore = 8; break;
+				}
+			}
 			$nScore += $nLineScore * $nTimes;
 			$strExtract .= $strLine . "\n\n";
 		}
