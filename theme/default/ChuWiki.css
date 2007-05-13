@@ -81,17 +81,17 @@ dt
     margin-top: 0.5em;
 }
 
-q::before{
+q:before{
 	content: "\ab\a0";
 }
-q::after{
+q:after{
 	content: "\a0\bb";
 }
-q[lang]::after{
+q[lang]:after{
 	content: "\a0\bb\a0[" attr(lang) "]";
 }
 
-a[hreflang]::after{
+a[hreflang]:after{
 	content: "\a0[" attr(hreflang) "]";
 }
 
