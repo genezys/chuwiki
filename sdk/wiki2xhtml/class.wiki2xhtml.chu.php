@@ -199,8 +199,6 @@ class wiki2xhtmlChu extends wiki2xhtmlBasic
 			$line = trim($line);
 		}
 		
-//		var_dump($type);
-//		var_dump($line);
 		return $line;
 	}
 
@@ -372,7 +370,7 @@ class wiki2xhtmlChu extends wiki2xhtmlBasic
 			}
 		}
 		
-		return trim($res);
+		return $res;
 	}
 }
 
