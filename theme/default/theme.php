@@ -18,6 +18,7 @@ function BeginDocument($strMode)
 	}
 	WriteLine('<meta name="Generator" content="&Config.Version;"/>');
 	WriteLine('<link rel="stylesheet" type="text/css" title="ChuWiki" href="&Config.URI;&Config.ThemePath;/ChuWiki.css"/>');
+	WriteLine('<link rel="alternate" type="application/rss+xml" href="&Config.URI;/latest-change.php" />');
 	WriteLine('</head>');
 	WriteLine('');
 	WriteLine('<body>');
