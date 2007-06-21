@@ -26,58 +26,58 @@ require(dirname(__FILE__) . '/sdk/sdk.php');
 /////////////////////////////////////////////////////////////
 
 // Chargement des informations de la page
-$strPage = GetCurrentPage();
+$strPage = ChuWiki::GetCurrentPage();
 
 if( isset($_POST['Preview']) )
 {
 	// En mode preview
-	$strWikiContent = GetPostedValue('Wiki');
+	$strWikiContent = ChuWiki::GetPostedValue('Wiki');
 }
 else if( isset($_POST['Save']) )
 {
 	// En mode sauvegarde
-	$strWikiContent = GetPostedValue('Wiki');
+	$strWikiContent = ChuWiki::GetPostedValue('Wiki');
 	
 	// Enregistrement de la page
-	Save($strPage, $strWikiContent);
+	ChuWiki::Save($strPage, $strWikiContent);
 
 	// Redirection vers l'affichage de la page
-	header('Location: ' . GetScriptURI('Wiki')  . FileNameEncode($strPage));
+	header('Location: ' . ChuWiki::GetScriptURI('Wiki')  . ChuWiki::FileNameEncode($strPage));
 	exit();
 }
 else
 {
 	// En mode standard
 	// Chargement du contenu wiki pour cette page
-	$strWikiContent = GetWikiContent($strPage);
+	$strWikiContent = ChuWiki::GetWikiContent($strPage);
 }
 
 // On ajoute du contenu supplémentaire pour certaines pages comme la liste ou les changements
-$strModifiedWikiContent = $strWikiContent . GetSpecialContent($strPage);
+$strModifiedWikiContent = $strWikiContent . ChuWiki::GetSpecialContent($strPage);
 
 // Rendu wiki
-$strHtmlContent = Render($strModifiedWikiContent);
+$strHtmlContent = ChuWiki::Render($strModifiedWikiContent);
 
 // On doit retirer les caractères non xhtml pour le contenu wiki qui sera édité
-$strWikiContent = xhtmlspecialchars($strWikiContent);
+$strWikiContent = ChuWiki::xhtmlspecialchars($strWikiContent);
 
 ////////////////////////////////////////////////////////////
 
 // Chargement du template
-$strContent = LoadTemplate('edit');
+$strContent = ChuWiki::LoadTemplate('edit');
 
 // Les premiers remplacements sont en fonction du fichier de config
-$astrReplacements = BuildStandardReplacements();
+$astrReplacements = ChuWiki::BuildStandardReplacements();
 
 // Ajoute les remplacements « runtime »
-AddReplacement($astrReplacements, 'Page.Name', htmlspecialchars($strPage));
-AddReplacement($astrReplacements, 'Page.Wiki', $strWikiContent);
-AddReplacement($astrReplacements, 'Page.Html', $strHtmlContent);
+ChuWiki::AddReplacement($astrReplacements, 'Page.Name', htmlspecialchars($strPage));
+ChuWiki::AddReplacement($astrReplacements, 'Page.Wiki', $strWikiContent);
+ChuWiki::AddReplacement($astrReplacements, 'Page.Html', $strHtmlContent);
 
 // Applique les remplacements
-$strContent = ReplaceAll($strContent, $astrReplacements);
+$strContent = ChuWiki::ReplaceAll($strContent, $astrReplacements);
 
 ////////////////////////////////////////////////////////////
-WriteXhtmlHeader();
+ChuWiki::WriteXhtmlHeader();
 echo $strContent;
 ?>

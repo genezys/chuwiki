@@ -25,7 +25,7 @@
 function ParseSmileyFile($strFileName)
 {
 	// Chargement du fichier des smileys
-	$strContent = LoadFile($strFileName);
+	$strContent = ChuWiki::LoadFile($strFileName);
 
 	// Les smileys sont traités au niveau HTML, il faut donc convertir 
 	// les caractères spéciaux éventuels

@@ -27,9 +27,11 @@ require('theme.php');
 
 <div id="Content">
 <form method="post" action="">
+<p id="PDate">
 <select name="Date" id="Date" size="10">
 &Page.History;
 </select>
+</p>
 <p id="PPreviewSave"><input type="submit" id="Preview" name="Preview" value="&Lang.Preview;" accesskey="p"/><input type="submit" id="Save" name="Save" value="&Lang.Restore;" accesskey="s"/></p>
 </form>
 

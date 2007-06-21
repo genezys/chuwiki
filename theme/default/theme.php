@@ -46,7 +46,7 @@ function WriteMenu()
 	WriteLine('<li><a href="&Config.WikiURI;&Lang.ChangesPage;">&Lang.ChangesPage;</a></li>');
 	WriteLine('<li><a href="&Config.WikiURI;&Lang.ListPage;">&Lang.ListPage;</a></li>');
 	WriteLine('</ul>');
-	echo RenderPage(GetLangVar('MenuPage'));
+	echo ChuWiki::RenderPage(ChuWiki::GetLangVar('MenuPage'));
 	WriteLine('</div>');
 }
 

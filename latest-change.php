@@ -49,7 +49,7 @@ function FormatLongIso8601Date($strDate)
 	return date('Y-m-d H:i:s', $date);
 }
 
-$astrLatestChanges = GetLatestChangePageList();
+$astrLatestChanges = chuwiki::GetLatestChangePageList();
 $strLatestDate = FormatRfc1123Date(reset($astrLatestChanges));
 
 $strDomain = 'http://' . $_SERVER['SERVER_NAME'];
@@ -60,7 +60,7 @@ foreach($astrLatestChanges as $strPage => $strDate)
 {
 		$entry = array();
 		$entry['page'] = htmlspecialchars($strPage);
-		$entry['link'] = $strDomain . GetScriptURI('Wiki') . rawurlencode($strPage);
+		$entry['link'] = $strDomain . chuwiki::GetScriptURI('Wiki') . rawurlencode($strPage);
 		$entry['date'] = $strDate;
 		$aEntries[] = $entry;
 }
