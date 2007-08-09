@@ -948,7 +948,7 @@ class ChuWiki
 			exit;
 		}
 
-		$strQuery = trim(strtolower($strQuery));
+		$strQuery = strtolower(trim($strQuery));
 		
 		if( strlen($strQuery) == 0 )
 		{
@@ -964,7 +964,7 @@ class ChuWiki
 			$nScore = 0;
 			$strExtract = '';
 
-			if( $strPage == $strQuery )
+			if( strtolower(trim($strPage)) == $strQuery )
 			{
 				$nScore += 20;
 			}
@@ -984,7 +984,7 @@ class ChuWiki
 				$nLineScore = 1; // 1 by default
 
 				// Better score for titles
-				if( preg_match('/^(!{1,3}).+/', $strLine, $astrMatches) ) 
+				if( preg_match('/^(!{1,3}).+/i', $strLine, $astrMatches) ) 
 				{
 					$nLevel = strlen($astrMatches[1]);
 					switch( $nLevel )
@@ -997,16 +997,16 @@ class ChuWiki
 				$nScore += $nLineScore * $nTimes;
 				$strExtract .= $strLine . "\n\n";
 			}
-
+			
 			if( $nScore !== 0 )
 			{
-				$aResults[$nScore] = $strPage;
+				$aResults[$strPage] = $nScore;
 			}
 		}
 
-		krsort($aResults); // on trie la tableau par ordre decroissant de pertinence
+		arsort($aResults); // on trie la tableau par ordre decroissant de pertinence
 
-		foreach( $aResults as $nScore => $strPage )
+		foreach( $aResults as $strPage => $nScore )
 		{
 			$strContent .= '-[' . $strPage . ']' . "\n";
 		}
