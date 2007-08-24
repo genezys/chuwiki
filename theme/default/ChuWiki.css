@@ -115,7 +115,7 @@ h1
 {
 	font-family: "Trebuchet MS", Verdana, "Bitstream Vera Sans", sans-serif;
 	color: #111;
-	margin: 0;
+	margin: 0 0 0.5em 0;
 }
 
 h2
@@ -202,13 +202,15 @@ h3
 ************************************************************/
 #Content
 {
-	float: right;
+	position: absolute;
+	top: 6.5em;
+	left: 38ex;
+	right: 2ex;
 	background: #fff;
 	color: #000;
 	border: 1px solid #CCC;
 	padding: 1em;
-	margin: 0.5em 0 1em 0ex;
-	width: 75%;
+	margin: 0;
 }
 
 #Content.Preview
@@ -220,9 +222,9 @@ h3
 ************************************************************/
 #Menu
 {
-	margin: 0.5em 0 0 0;
+	margin: 0;
 	padding: 0;
-    width: 20%;
+    width: 40ex;
 	font-size: 80%;
 }
 #Menu ul

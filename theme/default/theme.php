@@ -17,8 +17,9 @@ function BeginDocument($strMode)
 		WriteLine('<meta name="robots" content="noindex,nofollow"/>');
 	}
 	WriteLine('<meta name="Generator" content="&Config.Version;"/>');
-	WriteLine('<link rel="stylesheet" type="text/css" title="ChuWiki" href="&Config.URI;&Config.ThemePath;/ChuWiki.css"/>');
-	WriteLine('<link rel="alternate" type="application/rss+xml" href="&Config.URI;latest-change.php" />');
+	WriteLine('<link rel="stylesheet"           type="text/css"            title="ChuWiki"   href="&Config.URI;&Config.ThemePath;/ChuWiki.css"/>');
+	WriteLine('<link rel="alternate stylesheet" type="text/css"            title="ChuWiki 2" href="&Config.URI;&Config.ThemePath;/ChuWiki 2.css"/>');
+	WriteLine('<link rel="alternate"            type="application/rss+xml" title="RSS"       href="&Config.URI;latest-change"/>');
 	WriteLine('</head>');
 	WriteLine('');
 	WriteLine('<body>');
@@ -40,11 +41,11 @@ function BeginDocument($strMode)
 function WriteMenu()
 {
 	WriteLine('<div id="Menu">');
-	WriteLine('<h2><a href="&Config.WikiURI;&Lang.MenuPage;">&Lang.MenuPage;</a></h2>');
+	WriteLine('<h2><a href="&Config.WikiURI;&Lang.MenuPage;"   >&Lang.MenuPage;</a></h2>');
 	WriteLine('<ul>');
 	WriteLine('<li><a href="&Config.WikiURI;&Lang.DefaultPage;">&Lang.DefaultPage;</a></li>');
 	WriteLine('<li><a href="&Config.WikiURI;&Lang.ChangesPage;">&Lang.ChangesPage;</a></li>');
-	WriteLine('<li><a href="&Config.WikiURI;&Lang.ListPage;">&Lang.ListPage;</a></li>');
+	WriteLine('<li><a href="&Config.WikiURI;&Lang.ListPage;"   >&Lang.ListPage;</a></li>');
 	WriteLine('</ul>');
 	echo ChuWiki::RenderPage(ChuWiki::GetLangVar('MenuPage'));
 	WriteLine('</div>');
