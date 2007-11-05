@@ -25,17 +25,22 @@
 
 @media screen {
 
+html, table, textarea
+{
+	font-family: Georgia, serif;
+	font-size: 100%;
+}
+
 html
 {
-	background: #EEE;
+	background: #fff;
+	color: #000;
 	margin: 0;
 	padding: 0;
 }
 
 body
 {
-	font-family: Trebuchet MS, Geneva, Arial, Helvetica, sans-serif;
-	font-size: 90%;
 	margin: 1em;
 	padding: 0;
 }
@@ -43,36 +48,42 @@ body
 code, pre
 {
 	font-family: monospace;
-	font-size: 1.2em;
 }
 
-pre{
+pre
+{
 	border: 1px solid #BBB;
 	background: #DDD;
 	margin: 1em;
 	padding: 1em;
 	overflow: auto;
+	line-height: 1em;
 }
 
-blockquote{
+blockquote
+{
 	border-left: 1ex solid #ccc;
 	padding-left: 1ex;
 }
 
-p{
+p
+{
 	text-align: justify;
 }
 
-li{
+li
+{
 	margin-top: 0.25em;
 	margin-bottom: 0.25em;
 }
 
-table{
+table
+{
 	border-collapse: collapse;
 }
 
-td, th{
+td, th
+{
 	border: 1px solid #000;
 }
 
@@ -81,17 +92,23 @@ dt
     margin-top: 0.5em;
 }
 
-q:before{
+q:before
+{
 	content: "\ab\a0";
 }
-q:after{
+
+q:after
+{
 	content: "\a0\bb";
 }
-q[lang]:after{
+
+q[lang]:after
+{
 	content: "\a0\bb\a0[" attr(lang) "]";
 }
 
-a[hreflang]:after{
+a[hreflang]:after
+{
 	content: "\a0[" attr(hreflang) "]";
 }
 
@@ -102,7 +119,7 @@ a[hreflang]:after{
     font-size: 2em;
     color: #999;
     line-height: 1em;
-    margin: 0;
+    margin: 0 0 0 0;
 }
 
 #Logo a
@@ -113,9 +130,8 @@ a[hreflang]:after{
 
 h1
 {
-	font-family: "Trebuchet MS", Verdana, "Bitstream Vera Sans", sans-serif;
 	color: #111;
-	margin: 0 0 0.5em 0;
+	margin: 0 0 0 1ex;
 }
 
 h2
@@ -140,11 +156,11 @@ h3
 #Utils
 {
 	position: absolute;
-	font-size: 90%;
+	font-size: 80%;
 	padding: 5px 0;
 	margin: 0;
 	right: 1em;
-	top: 1em;
+	top: 0.5em;
 }
 
 #Utils li
@@ -159,14 +175,20 @@ h3
 	margin: 0;
 }
 
-#Utils li a
+#Utils li a, input
 {
 	border: 1px solid #666;
-	-moz-border-radius: 5px 5px 4px 4px;
+	border-color: #aaa #666 #666 #aaa;
 	background: #F2F2F2 url(../default/gfx/tb.png) repeat-x;
-	padding: 4px 8px;
+	padding: 0.5em 1ex 0.3em 1ex;
 	color: #333;
 	text-decoration: none;
+	font-family: Helvetica, Tahoma, Arial, sans-serif;
+}
+#Search input
+{
+	background: #fff;
+	border-color: #666 #aaa #aaa #666;
 }
 
 #Utils li a:hover{
@@ -182,35 +204,19 @@ h3
 
 #Search input
 {
-	border: 1px solid #000;
-	background: #fff;
-	color: #000;
 	margin: 0 0.5ex;
-	padding: 4px 8px;
-}
-
-#Search .Button
-{
-	border: 1px solid #666;
-	-moz-border-radius: 5px 5px 4px 4px;
-	background: #F2F2F2 url(../default/gfx/tb.png) repeat-x;
-	padding: 4px 8px;
-	color: #333;
 }
 
 /* Contenu
 ************************************************************/
 #Content
 {
-	position: absolute;
-	top: 6.5em;
-	left: 38ex;
-	right: 2ex;
-	background: #fff;
-	color: #000;
-	border: 1px solid #CCC;
-	padding: 1em;
-	margin: 0;
+	padding: 1px 4ex 1px 2ex;
+	margin: 0 0 1em 0;
+	width: 60ex;
+	line-height: 1.5em;
+	float: left;
+	overflow: hidden;
 }
 
 #Content.Preview
@@ -222,61 +228,47 @@ h3
 ************************************************************/
 #Menu
 {
-	margin: 0;
-	padding: 0;
-    width: 40ex;
+	font-family: Verdana, Helvetica, sans-serif;
+	float: left;
+	margin: 1em 0;
+	padding: 1em 2ex;
+    width: 33ex;
 	font-size: 80%;
+	border-left: 1px solid #999;
 }
-#Menu ul
-{
-	background: #fff;
-	border: 1px solid #CCC;
-	color: #000;
-	padding: 0.5em 0;
-	margin: 0 0 1em 0;
-}
-#Menu li
-{
-	display: inline;
-}
-#Menu li a
-{
-	display: block;
-	padding: 0.2em 1ex;
-}
-#Menu li a:hover
-{
-	color: #000;
-	background: #eee;
-}
-
 #Menu h2
 {
-	background: #F2F2F2 url(../default/gfx/tb.png) repeat-x;
-	font-size: 1.2em;
+	font-size: 120%;
 	text-align: center;
 	border-bottom: 0;
-	padding: 0 8px;
+	padding: 0;
 	margin: 0;
     color: #000;
 	text-decoration: none;
-	border: 1px solid #CCC;
-	border-bottom: 0;
 }
 
 /* Edit Mode
 ************************************************************/
-#Wiki{
-	border: 1px solid #CCC;
-	width: 100%;
+form div, #PPreviewSave
+{
+	margin: 1em 0 1em 2ex;
+	clear: both;
 }
 
-textarea, select{
-	border: 0;
+#Wiki
+{
+	border: 1px solid #CCC;
+	width: 60ex;
+	margin: 0 0 0 0;
+}
+
+textarea, select, input
+{
 	margin: 0;
+}
+textarea, select
+{
 	width: 100%;
-	font-family: Trebuchet MS, Geneva, Arial, Helvetica, sans-serif;
-	font-size: 90%;
 	border: 1px solid #ccc;
 }
 
@@ -290,8 +282,9 @@ textarea, select{
 {
 	background: #fff;
 	border: 1px solid #CCC;
-	padding: 1em;
-	font-size: 90%;
+	padding: 1em 2ex;
+	margin: 1em 0 1em 2ex;
+	width: 56ex;
 }
 
 #Rules dt
@@ -304,22 +297,18 @@ textarea, select{
     color: #191;
 }
 
-/* Footer
-************************************************************/
-#footer{
-	text-align: center;
-	font-weight: bold;
-	color: #AAA;
-}
-
 } /* @media screen */
 
 @media print
 {
+html, table, textarea, input
+{
+	font-family: Georgia, serif;
+	font-size: 100%;
+}
 
 html, body
 {
-	font-family: Georgia;
 	text-align: justify;
 	margin: 0;
 	padding: 0;
@@ -334,7 +323,6 @@ html, body
 
 h1, h2, h3, h4
 {
-	font-family: sans-serif;
 	text-align: left;
 	color: #000;
 }
