@@ -213,7 +213,7 @@ h3
 {
 	padding: 1px 4ex 1px 2ex;
 	margin: 0 0 1em 0;
-	width: 60ex;
+	width: 70ex;
 	line-height: 1.5em;
 	float: left;
 	overflow: hidden;
@@ -239,12 +239,9 @@ h3
 #Menu h2
 {
 	font-size: 120%;
-	text-align: center;
 	border-bottom: 0;
 	padding: 0;
 	margin: 0;
-    color: #000;
-	text-decoration: none;
 }
 
 /* Edit Mode
@@ -258,7 +255,7 @@ form div, #PPreviewSave
 #Wiki
 {
 	border: 1px solid #CCC;
-	width: 60ex;
+	width: 70ex;
 	margin: 0 0 0 0;
 }
 
@@ -284,7 +281,7 @@ textarea, select
 	border: 1px solid #CCC;
 	padding: 1em 2ex;
 	margin: 1em 0 1em 2ex;
-	width: 56ex;
+	width: 66ex;
 }
 
 #Rules dt

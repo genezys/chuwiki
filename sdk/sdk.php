@@ -760,7 +760,12 @@ class ChuWiki
 		}
 
 		// On enregistre le contenu du fichier
-		$strDate = date('YmdHis');
+		$date = time();
+		if( isset($k_aConfig['TimeShift']) )
+		{
+			$date += intval($k_aConfig['TimeShift']);
+		}
+		$strDate = date('YmdHis', $date);
 		$strSavePath = $strPageDir . '/' . $strDate . '.' . $k_strExtension;
 
 		$file = $ChuOpen($strSavePath, 'w9');
