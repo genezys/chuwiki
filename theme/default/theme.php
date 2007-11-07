@@ -19,6 +19,7 @@ function BeginDocument($strMode)
 	WriteLine('<link rel="stylesheet"           type="text/css"            title="ChuWiki"   href="&Config.URI;&Config.ThemePath;/ChuWiki.css"/>');
 	WriteLine('<link rel="alternate stylesheet" type="text/css"            title="ChuWiki 2" href="&Config.URI;&Config.ThemePath;/ChuWiki 2.css"/>');
 	WriteLine('<link rel="alternate"            type="application/rss+xml" title="RSS"       href="&Config.URI;latest-change"/>');
+	WriteLine('<script type="text/javascript" src="&Config.URI;&Config.ThemePath;/ChuWiki.js"></script>');
 	WriteLine('</head>');
 	WriteLine('');
 	WriteLine('<body>');
