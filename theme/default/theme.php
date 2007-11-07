@@ -2,8 +2,7 @@
 
 function WriteLine($str)
 {
-	echo $str;
-	echo "\n";
+	echo $str, "\n";
 }
 
 function BeginDocument($strMode)
@@ -64,7 +63,7 @@ function EndDocument($strMode)
 	}
 	else
 	{
-		WriteLine('	<li><a href="&Config.EditURI;&Page.Name;#Wiki">&Lang.Edit;</a></li>');
+		WriteLine('<li><a href="&Config.EditURI;&Page.Name;#Wiki">&Lang.Edit;</a></li>');
 	}
 
 	if( $strMode == 'history' )
@@ -73,10 +72,10 @@ function EndDocument($strMode)
 	}
 	else
 	{
-		WriteLine('	<li><a href="&Config.HistoryURI;&Page.Name;">&Lang.History;</a></li>');
+		WriteLine('<li><a href="&Config.HistoryURI;&Page.Name;">&Lang.History;</a></li>');
 	}
 
-	WriteLine('	<li><form id="Search" action="&Config.WikiURI;&Lang.SearchPage;" method="post"><p><input type="text" name="Search"/><input type="submit" class="Button" value="&Lang.SearchPage;"/></p></form></li>');
+	WriteLine('<li><form id="Search" action="&Config.WikiURI;&Lang.SearchPage;" method="post"><p><input type="search" name="Search"/><input type="submit" class="Button" value="&Lang.SearchPage;"/></p></form></li>');
 
 	WriteLine('</ul>');
 	WriteLine('');

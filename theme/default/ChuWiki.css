@@ -180,15 +180,24 @@ h3
 	border: 1px solid #666;
 	border-color: #aaa #666 #666 #aaa;
 	background: #F2F2F2 url(../default/gfx/tb.png) repeat-x;
-	padding: 0.5em 1ex 0.3em 1ex;
+	padding: 0.3em 2ex;
 	color: #333;
 	text-decoration: none;
 	font-family: Helvetica, Tahoma, Arial, sans-serif;
 }
+
 #Search input
 {
 	background: #fff;
 	border-color: #666 #aaa #aaa #666;
+	padding: 0.3em 1ex;
+}
+
+#Search input.Button
+{
+	background: #F2F2F2 url(../default/gfx/tb.png) repeat-x;
+	padding: 0.22em 2ex;
+	border-color: #aaa #666 #666 #aaa;
 }
 
 #Utils li a:hover{
@@ -248,14 +257,19 @@ h3
 ************************************************************/
 form div, #PPreviewSave
 {
-	margin: 1em 0 1em 2ex;
+	margin: 1em 2ex;
 	clear: both;
+}
+
+#PPreviewSave input
+{
+	font-size: 90%;
+	padding: 0.22em 2ex;
 }
 
 #Wiki
 {
 	border: 1px solid #CCC;
-	width: 70ex;
 	margin: 0 0 0 0;
 }
 
@@ -280,8 +294,7 @@ textarea, select
 	background: #fff;
 	border: 1px solid #CCC;
 	padding: 1em 2ex;
-	margin: 1em 0 1em 2ex;
-	width: 66ex;
+	margin: 1em 2ex;
 }
 
 #Rules dt
