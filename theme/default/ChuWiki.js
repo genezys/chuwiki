@@ -10,6 +10,8 @@ window.onload = function()
 			editor.style.height = editor.scrollHeight + "px";
 		}
 		editor.onkeyup = ResizeEditor;
+		editor.onkeydown = ResizeEditor;
+		editor.onmousemove = ResizeEditor;
 		ResizeEditor();
 	}
 }
