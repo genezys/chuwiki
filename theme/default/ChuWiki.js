@@ -7,7 +7,7 @@ window.onload = function()
 	{
 		function ResizeEditor()
 		{
-			if( editor.scrollHeight > editor.style.height )
+			if( editor.scrollHeight > editor.clientHeight )
 			{
 				editor.style.height = editor.scrollHeight + "px";
 			}
