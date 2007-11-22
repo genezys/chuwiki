@@ -7,7 +7,10 @@ window.onload = function()
 	{
 		function ResizeEditor()
 		{
-			editor.style.height = editor.scrollHeight + "px";
+			if( editor.scrollHeight > editor.style.height )
+			{
+				editor.style.height = editor.scrollHeight + "px";
+			}
 		}
 		editor.onkeyup = ResizeEditor;
 		editor.onkeydown = ResizeEditor;
