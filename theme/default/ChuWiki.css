@@ -222,7 +222,7 @@ h3
 {
 	padding: 1px 4ex 1px 2ex;
 	margin: 0 0 1em 0;
-	width: 70ex;
+	width: 80ex;
 	line-height: 1.5em;
 	float: left;
 	overflow: hidden;
@@ -241,7 +241,7 @@ h3
 	float: left;
 	margin: 1em 0;
 	padding: 1em 2ex;
-    width: 33ex;
+    width: 20ex;
 	font-size: 80%;
 	border-left: 1px solid #999;
 }
