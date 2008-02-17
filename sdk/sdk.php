@@ -1013,7 +1013,7 @@ class ChuWiki
 
 		foreach( $aResults as $strPage => $nScore )
 		{
-			$strContent .= '-[' . $strPage . ']' . "\n";
+			$strContent .= "\n" . '-[' . $strPage . ']';
 		}
 
 		return $strContent;
