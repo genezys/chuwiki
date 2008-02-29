@@ -515,6 +515,86 @@ class ChuWiki
 		return ChuWiki::Render($strModifiedWikiContent);
 	}
 
+	function GenerateInclude($strParams)
+	{
+		// Récupère le nom de la page
+		preg_match('/[^|]+/', $strParams, $astrMatches);
+		$strPage = trim($astrMatches[0]);
+
+		// Récupère les paramètres
+		preg_match_all('/\|([^=]+)=([^|]+)/', $strParams, $astrMatches, PREG_SET_ORDER);
+
+		// Récupère le contenu wiki à inclure
+		$strContent = ChuWiki::GetWikiContent($strPage);
+
+		// Remplace les paramètres par leur valeur
+		$astrReplacements = array('Vars' => array(), 'Values' => array());
+		foreach( $astrMatches as $astrParams )
+		{
+			$strParam = trim($astrParams[1]);
+			$strValue = trim($astrParams[2]);
+			ChuWiki::AddReplacement($astrReplacements, $strParam, $strValue);
+		}
+		$strContent = ChuWiki::ReplaceAll($strContent, $astrReplacements);
+		
+		// Gère les commandes dans le contenu inclus
+		$strContent = ChuWiki::ProcessWikiContent($strContent);
+
+		// Inclue le contenu modifié
+		return $strContent;
+	}
+
+	function GenerateTableOfContents($astrLines)
+	{
+		$strWikiToc = '';
+		foreach( $astrLines as $strSearchedLine )
+		{
+			if( preg_match('/^(!{1,3}) *(.+)/', $strSearchedLine, $astrMatches) ) 
+			{
+				$nTags = strlen($astrMatches[1]);
+				
+				$strText = trim($astrMatches[2]);
+				$strLink = '';
+
+				if( preg_match('/~([^~]*)~(.*)/', $strText, $astrMatches) )
+				{
+					$strLink = $astrMatches[1];
+					$strText = $astrMatches[2];
+				}
+
+				$strWikiToc .= str_repeat('*', $nTags);
+				if( $strLink == "" )
+				{
+					$strWikiToc .= $strText;
+				}
+				else
+				{
+					$strWikiToc .= '[' . $strText . '|#' . $strLink . ']';
+				}
+				$strWikiToc .= "\n";
+			} 
+		}
+		return $strWikiToc;
+	}
+
+	function GenerateCategory($strParams)
+	{
+		global $k_aLangConfig;
+
+		// Récupère le nom des catégories
+		$astrCategories = explode('|', $strParams);
+
+		// Génère le lien pour chaque catégorie
+		foreach( $astrCategories as $i => $strCategory )
+		{
+			$strCategory = trim($strCategory);
+			$astrCategories[$i] = '[' . $strCategory . '|' . $k_aLangConfig['CategoryPage'] . ' ' . $strCategory . ']';
+		}
+
+		// Construit la ligne wiki correspondante
+		return '\[ ' . implode(' - ', $astrCategories) . ' ]';
+	}
+
 	function ProcessWikiContent($strWikiContent)
 	{
 		$astrLines = explode("\n", $strWikiContent);
@@ -535,65 +615,24 @@ class ChuWiki
 				// Inclusion d'un template
 				if( $strCommand == 'include' )
 				{
-					// Récupère le nom de la page
-					preg_match('/[^|]+/', $strParams, $astrMatches);
-					$strPage = trim($astrMatches[0]);
-
-					// Récupère les paramètres
-					preg_match_all('/\|([^=]+)=([^|]+)/', $strParams, $astrMatches, PREG_SET_ORDER);
-
-					// Récupère le contenu wiki à inclure
-					$strContent = ChuWiki::GetWikiContent($strPage);
-
-					// Remplace les paramètres par leur valeur
-					$astrReplacements = array('Vars' => array(), 'Values' => array());
-					foreach( $astrMatches as $astrParams )
-					{
-						$strParam = trim($astrParams[1]);
-						$strValue = trim($astrParams[2]);
-						ChuWiki::AddReplacement($astrReplacements, $strParam, $strValue);
-					}
-					$strContent = ChuWiki::ReplaceAll($strContent, $astrReplacements);
-					
-					// Gère les commandes dans le contenu inclus
-					$strContent = ChuWiki::ProcessWikiContent($strContent);
-
-					// Inclue le contenu modifié
-					$strResult .= $strContent;
+					$strSpecial = ChuWiki::GenerateInclude($strParams);
 				}
 				else if( $strCommand == 'toc' )
 				{
-					$strWikiToc = '';
-					foreach( $astrLines as $strSearchedLine )
-					{
-						if( preg_match('/^(!{1,3}) *(.+)/', $strSearchedLine, $astrMatches) ) 
-						{
-							$nTags = strlen($astrMatches[1]);
-							
-							$strText = trim($astrMatches[2]);
-							$strLink = '';
-
-							if( preg_match('/~([^~]*)~(.*)/', $strText, $astrMatches) )
-							{
-								$strLink = $astrMatches[1];
-								$strText = $astrMatches[2];
-							}
-
-							$strWikiToc .= str_repeat('*', $nTags);
-							if( $strLink == "" )
-							{
-								$strWikiToc .= $strText;
-							}
-							else
-							{
-								$strWikiToc .= '[' . $strText . '|#' . $strLink . ']';
-							}
-							$strWikiToc .= "\n";
-						} 
-					}
-					$strResult .= $strWikiToc;
+					$strSpecial = ChuWiki::GenerateTableOFContents($astrLines);
 				}
-				continue;
+				else if( $strCommand == 'category' )
+				{
+					$strSpecial = ChuWiki::GenerateCategory($strParams);
+				}
+
+				if( strlen($strSpecial) > 0 )
+				{
+					$strResult .= "\n\n";
+					$strResult .= $strSpecial;
+					$strResult .= "\n\n";
+					continue; // Do not add this line in the content
+				}
 			}
 			$strResult .= $strLine . "\n";			
 		}
@@ -1019,6 +1058,65 @@ class ChuWiki
 		return $strContent;
 	}
 
+	function GetCategoryContent($strQuery)
+	{
+		$strQuery = trim($strQuery);
+		
+		if( strlen($strQuery) == 0 )
+		{
+			return '';
+		}
+
+		$aResults = array();
+		$strContent = '';
+
+		$astrPages = ChuWiki::GetPageList();
+		foreach($astrPages as $strPage => $date)
+		{
+			$strWiki = ChuWiki::GetWikiContent($strPage);
+			$astrLines = explode("\n", $strWiki);
+
+			$bFound = false;
+
+			foreach($astrLines as $strLine)
+			{
+				$strTag = "::category ";
+				$nTagLength = strlen($strTag);
+
+				if( substr($strLine, 0, $nTagLength) == $strTag )
+				{
+					$strCategories = substr($strLine, $nTagLength);
+					$astrCategories = explode('|', $strCategories);
+
+					foreach( $astrCategories as $strCategory )
+					{
+						$strCategory = trim($strCategory);
+
+						if( $strCategory == $strQuery )
+						{
+							$aResults[] = $strPage;
+							$bFound = true;
+							break;
+						}
+					}
+				}
+				if( $bFound )
+				{
+					break;
+				}
+			}
+		}
+
+		ksort($aResults); // on trie les pages par ordre alphbétique
+
+		foreach( $aResults as $strPage )
+		{
+			$strContent .= '-[' . $strPage . ']' . "\n";
+		}
+
+		return $strContent;
+	}
+
 	function GetSpecialContent($strPage)
 	{
 		global $k_aLangConfig;
@@ -1045,6 +1143,16 @@ class ChuWiki
 		{
 			$strQuery = substr($strPage, $nSearchPageLength);
 			$strSpecial .= ChuWiki::GetSearchContent($strQuery);
+		}
+
+		// Si c'est la page de catégorie, on ajoute les résultats après
+		// La requête est passée à la suite du nom de la page
+		$strCategoryPage = @$k_aLangConfig['CategoryPage'];
+		$nCategoryPageLength = strlen($strCategoryPage);
+		if( $nCategoryPageLength > 0 && substr($strPage, 0, $nCategoryPageLength) == $strCategoryPage )
+		{
+			$strQuery = substr($strPage, $nCategoryPageLength);
+			$strSpecial .= ChuWiki::GetCategoryContent($strQuery);
 		}
 
 		return $strSpecial;
