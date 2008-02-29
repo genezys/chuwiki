@@ -24,7 +24,7 @@
 
 #error_reporting(E_ALL);
 
-$k_strVersion = 'ChuWiki 1.4α';
+$k_strVersion = 'ChuWiki 2.0α';
 
 // Chargement des configuration
 $k_aConfig = ChuWiki::ParseIniFile(dirname(__FILE__) . '/../configuration.ini');
