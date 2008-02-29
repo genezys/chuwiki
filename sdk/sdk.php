@@ -33,7 +33,7 @@ $k_aLangConfig = ChuWiki::ParseIniFile(dirname(__FILE__) . '/../' . $k_aConfig['
 // Les fonctions d'ouverture de fichier doivent utiliser ou non 
 // la zlib selon que celle-ci est présente ou pas
 $k_bCanZlib = function_exists('gzfile');
-$k_bUseZlib = ($k_bCanZlib && @$k_aConfig['NoCompression'] != 'true');
+$k_bUseZlib = ( $k_bCanZlib && ! @$k_aConfig['NoCompression'] );
 
 $ChuFile = $k_bCanZlib ? 'gzfile' : 'file';
 $ChuOpen = $k_bUseZlib ? 'gzopen' : 'fopen';
@@ -397,7 +397,7 @@ class ChuWiki
 		$strContent = implode('', $ChuFile($strFilePath));
 		$strContent = str_replace("\r", '', $strContent);
 
-		if( @$k_aConfig['VerifyUtf8'] == 'true' )
+		if( @$k_aConfig['VerifyUtf8'] )
 		{
 			if( !ChuWiki::VerifyUtf8($strContent) )
 			{
