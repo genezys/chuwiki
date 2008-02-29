@@ -24,7 +24,7 @@
 
 #error_reporting(E_ALL);
 
-$k_strVersion = 'ChuWiki 2.0α';
+$k_strVersion = 'ChuWiki 1.4α';
 
 // Chargement des configuration
 $k_aConfig = ChuWiki::ParseIniFile(dirname(__FILE__) . '/../configuration.ini');
@@ -133,7 +133,14 @@ class ChuWiki
 			ChuWiki::Error('Fichier de configuration manquant ' . $strFileName);
 		}
 
-		return parse_ini_file($strFileName);
+		$ini = parse_ini_file($strFileName);
+		
+		foreach( $ini as $key => $value )
+		{
+			$ini[$key] = ChuWiki::xhtmlspecialchars($value);
+		}
+		
+		return $ini;
 	}
 
 	// Utile seulement pour les templates souhaitant
