@@ -53,7 +53,7 @@ else
 }
 
 // On ajoute du contenu supplémentaire pour certaines pages comme la liste ou les changements
-$strModifiedWikiContent = $strWikiContent . ChuWiki::GetSpecialContent($strPage);
+$strModifiedWikiContent = ChuWiki::AddSpecialWikiContent($strPage, $strWikiContent);
 
 // Rendu wiki
 $strHtmlContent = ChuWiki::Render($strModifiedWikiContent);

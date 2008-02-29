@@ -30,8 +30,8 @@ $strPage = ChuWiki::GetCurrentPage();
 // Chargement du contenu wiki pour cette page
 $strWikiContent = ChuWiki::GetWikiContent($strPage);
 
-// On ajoute du contenu supplémentaire pour certaines pages comme la liste ou les changements
-$strModifiedWikiContent = $strWikiContent . ChuWiki::GetSpecialContent($strPage);
+// Ajout des contenus spéciaux de certaines pages
+$strModifiedWikiContent = ChuWiki::AddSpecialWikiContent($strPage, $strWikiContent);
 
 // Rendu wiki
 $strHtmlContent = ChuWiki::Render($strModifiedWikiContent);
