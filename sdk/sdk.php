@@ -133,30 +133,7 @@ class ChuWiki
 			ChuWiki::Error('Fichier de configuration manquant ' . $strFileName);
 		}
 
-		$strContent = implode("", file($strFileName));
-		$astrLines = explode("\n", $strContent);
-
-		$aVars = array();
-
-		foreach($astrLines as $strLine)
-		{
-			// Commentaires
-			if( substr($strLine, 0, 1) == ';' )
-			{
-				continue;
-			}
-			
-			$nMiddle = strpos($strLine, '=');
-			if( $nMiddle)
-			{
-				$strName = trim(substr($strLine, 0, $nMiddle));
-				$strValue = trim(substr($strLine, $nMiddle + 1));
-				
-				$aVars[$strName] = ChuWiki::xhtmlspecialchars($strValue);
-			}
-		}
-		
-		return $aVars;
+		return parse_ini_file($strFileName);
 	}
 
 	// Utile seulement pour les templates souhaitant
