@@ -22,7 +22,7 @@
 // ***** END LICENSE BLOCK *****
 ////////////////////////////////////////////////////////////////////////////////
 
-#error_reporting(E_ALL);
+error_reporting(E_ALL);
 
 $k_strVersion = 'ChuWiki 2.0α';
 
