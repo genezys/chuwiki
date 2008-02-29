@@ -265,7 +265,7 @@ class ChuWiki
 	{
 		global $k_aConfig;
 		
-		if( $k_aConfig['UsePathInfo'] == 'true' )
+		if( $k_aConfig['UsePathInfo'] )
 		{
 			return '/';
 		}
@@ -621,7 +621,7 @@ class ChuWiki
 		}
 		return $strResult;
 	}
-
+	
 	function Render($strWikiContent)
 	{
 		global $k_aConfig, $k_aLangConfig;
@@ -636,7 +636,10 @@ class ChuWiki
 		$formatter = null;
 		if( file_exists($strFileFormat) )
 		{
-			require_once(dirname(__FILE__) . '/../' . $strFileFormat);
+			if( !class_exists('CLanguageFormat') )
+			{
+				require(dirname(__FILE__) . '/../' . $strFileFormat);
+			}
 
 			if( class_exists('CLanguageFormat') )
 			{
@@ -656,15 +659,21 @@ class ChuWiki
 		switch($k_aConfig['Renderer'])
 		{
 		case 'WikiRenderer':
-			require_once(dirname(__FILE__) . '/WikiRenderer/WikiRenderer.lib.php');
-			require_once(dirname(__FILE__) . '/WikiRenderer/rules/chu_to_xhtml.php');
+			if( !class_exists("WikiRenderer") )
+			{
+				require(dirname(__FILE__) . '/WikiRenderer/WikiRenderer.lib.php');
+				require(dirname(__FILE__) . '/WikiRenderer/rules/chu_to_xhtml.php');
+			}
 
 			$Renderer = new WikiRenderer('chu_to_xhtml');
 			$strHtmlContent = $Renderer->render($strWikiContent);
 			break;
 
 		case 'wiki2xhtml':
-			require_once(dirname(__FILE__) . '/wiki2xhtml/class.wiki2xhtml.chu.php');
+			if( !class_exists("wiki2xhtmlChu") )
+			{
+				require(dirname(__FILE__) . '/wiki2xhtml/class.wiki2xhtml.chu.php');
+			}
 			$Renderer = new wiki2xhtmlChu();
 			$strHtmlContent = $Renderer->transform($strWikiContent);
 			break;
@@ -675,7 +684,7 @@ class ChuWiki
 		}
 
 		// Sans PathInfo, il faut mettre un ? devant les liens vers les pages internes
-		if( $k_aConfig['UsePathInfo'] != 'true' )
+		if( !$k_aConfig['UsePathInfo'] )
 		{
 			$strHtmlContent = preg_replace('/href="([^"]*)"/', 'href="?\1"', $strHtmlContent);
 			$strHtmlContent = preg_replace('/href="\?(\.\..*)"/', 'href="\1"', $strHtmlContent);
@@ -686,7 +695,10 @@ class ChuWiki
 
 		if ( $k_aConfig['SmileyPath'] != '' )
 		{
-			require_once(dirname(__FILE__) . '/smiley-replacer.php');
+			if( !function_exists("MakeImageSmileys") )
+			{
+				require(dirname(__FILE__) . '/smiley-replacer.php');
+			}
 			MakeImageSmileys($strHtmlContent);
 		}
 
