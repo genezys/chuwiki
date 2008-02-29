@@ -937,9 +937,10 @@ class ChuWiki
 
 			if( $strDay != $strDayPrev )
 			{
-				$strContent .= "\n" . '!' . substr($strDay, 0, 4)
-									. '-' . substr($strDay, 4, 2) 
-									. '-' . substr($strDay, 6, 2);
+				$strContent .= '!' . substr($strDay, 0, 4)
+							 . '-' . substr($strDay, 4, 2) 
+							 . '-' . substr($strDay, 6, 2)
+							 . "\n";
 			}
 
 			$bNew = ( ($date - $dateLastVisit) > 0 );
