@@ -555,6 +555,7 @@ class ChuWiki
 				{
 					$strWikiToc .= '[' . $strText . '|#' . $strLink . ']';
 				}
+				$strWikiToc .= "\n";
 			} 
 		}
 		return $strWikiToc;
