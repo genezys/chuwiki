@@ -83,3 +83,5 @@ function EndDocument($strMode)
 	WriteLine('</body>');
 	WriteLine('</html>');
 }
+
+?>
