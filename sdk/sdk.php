@@ -510,9 +510,9 @@ class ChuWiki
 		$astrReplacements = array('Vars' => array(), 'Values' => array());
 		foreach( $astrParams as $strParam)
 		{
-			$astrParts = explode('=', $strParam);
-			$strParam = trim(array_shift($astrParts));
-			$strValue = trim(implode('=', $astrParts));
+			$astrParts = explode('=', $strParam, 2);
+			$strParam = trim($astrParts[0]);
+			$strValue = trim($astrParts[1]);
 			ChuWiki::AddReplacement($astrReplacements, $strParam, $strValue);
 		}
 
