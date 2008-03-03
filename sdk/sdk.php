@@ -1048,7 +1048,7 @@ class ChuWiki
 
 		foreach( $aResults as $strPage => $nScore )
 		{
-			$strContent .= '-[' . $strPage . ']' . "\n";
+			$strContent .= '#[' . $strPage . ']' . "\n";
 		}
 
 		return $strContent;
@@ -1103,7 +1103,7 @@ class ChuWiki
 			}
 		}
 
-		asort($aResults); // on trie les pages par ordre alphbétique
+		asort($aResults); // on trie les pages par ordre alphabétique
 
 		foreach( $aResults as $strPage )
 		{
