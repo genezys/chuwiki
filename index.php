@@ -25,7 +25,7 @@
 require(dirname(__FILE__) . '/sdk/sdk.php');
 /////////////////////////////////////////////////////////////
 
-$strWikiScript = $k_aConfig['WikiScript'];
+$strWikiScript = $g_aConfig['WikiScript'];
 if( $strWikiScript == '' )
 {
 	die();	

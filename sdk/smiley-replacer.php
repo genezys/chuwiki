@@ -67,13 +67,13 @@ function ParseSmileyFile($strFileName)
 
 function MakeImageSmileys(&$strContent)
 {
-	global $k_strWikiURI, $k_aConfig;
+	global $g_strWikiURI, $g_aConfig;
 
-	$strSmileyPackPath = $k_aConfig['SmileyPath'] . '/';
+	$strSmileyPackPath = $g_aConfig['SmileyPath'] . '/';
 	$astrSmileys = ParseSmileyFile($strSmileyPackPath . 'smileys.ini');
 
 	$Replacer = new CSmileyReplacer($astrSmileys, true, 
-									$k_strWikiURI . $strSmileyPackPath);
+									$g_strWikiURI . $strSmileyPackPath);
 	$strContent = $Replacer->Replace($strContent);
 }
 
