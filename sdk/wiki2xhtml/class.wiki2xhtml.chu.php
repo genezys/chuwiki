@@ -27,7 +27,7 @@ require(dirname(__FILE__) . '/class.wiki2xhtml.basic.php');
 class wiki2xhtmlChu extends wiki2xhtmlBasic
 {
 	var $bInCode = false;
-	var $bFirstLineOfPre = false;
+	var $bEmptyFirstLineOfPre = false;
 
 	function wiki2xhtmlChu()
 	{
@@ -96,7 +96,7 @@ class wiki2xhtmlChu extends wiki2xhtmlBasic
 		$pre_type = $type;
 		$pre_mode = $mode;
 		$type = $mode = NULL;
-		
+
 		$line = htmlspecialchars($this->T[$i],ENT_NOQUOTES);
 
 		# Fin d'un bloc préformaté
@@ -187,7 +187,7 @@ class wiki2xhtmlChu extends wiki2xhtmlBasic
 			$this->bInCode = true;
 		}
 		# Préformaté
-		elseif ($this->getOpt('active_pre') && preg_match('/^[ ]{1}(.*)$/',$line,$cap) )
+		elseif ($this->getOpt('active_pre') && preg_match('/^[ ](.*)$/',$line,$cap) )
 		{
 			$type = 'pre';
 			$line = $cap[1];
@@ -205,7 +205,7 @@ class wiki2xhtmlChu extends wiki2xhtmlBasic
 	function __openLine($type,$mode,$pre_type,$pre_mode)
 	{
 		$open = ($type != $pre_type);
-		
+				
 		if ($open && $type == 'p')
 		{
 			return "\n<p>";
@@ -268,13 +268,8 @@ class wiki2xhtmlChu extends wiki2xhtmlBasic
 	
 	function __closeLine($type,$mode,$pre_type,$pre_mode)
 	{
-		if( $this->bFirstLineOfPre )
-		{
-			return '';
-		}
-
 		$close = ($type != $pre_type);
-
+		
 		if ($close && $pre_type == 'p')
 		{
 			return "</p>\n";
@@ -308,6 +303,10 @@ class wiki2xhtmlChu extends wiki2xhtmlBasic
 				}
 			}
 			return $res;
+		}
+		else if( $this->bEmptyFirstLineOfPre ) 
+		{
+			return NULL;
 		}
 		else
 		{
@@ -344,7 +343,7 @@ class wiki2xhtmlChu extends wiki2xhtmlBasic
 			$res .= $this->__closeLine($type,$mode,$pre_type,$pre_mode);
 			$res .= $this->__openLine($type,$mode,$pre_type,$pre_mode);
 						
-			$this->bFirstLineOfPre = ( $type === 'pre' && $pre_type !== $type );
+			$this->bEmptyFirstLineOfPre = ( $type === 'pre' && $pre_type !== $type && strlen($line) === 0 );
 
 			# P dans les blockquotes
 			if ($type == 'blockquote' && trim($line) == '' && $pre_type == $type) {

@@ -589,10 +589,11 @@ class ChuWiki
 		// quelques syntaxes spécifiques à ChuWiki
 		foreach( $astrLines as $strLine )
 		{
-			$strLine = trim($strLine);
-			
-			if( preg_match('/^::([a-z]+)(.*)?/', $strLine, $astrMatches) != 0 )
+			$strTrimmedLine = trim($strLine);
+
+			if( preg_match('/^::([a-z]+)(.*)?/', $strTrimmedLine, $astrMatches) != 0 )
 			{
+				
 				$strCommand = $astrMatches[1];
 				$strParams = trim($astrMatches[2]);
 				
@@ -618,7 +619,7 @@ class ChuWiki
 					continue; // Do not add this line in the content
 				}
 			}
-			$strResult .= $strLine . "\n";			
+			$strResult .= $strLine . "\n";
 		}
 		return $strResult;
 	}
@@ -653,9 +654,9 @@ class ChuWiki
 		{
 			$strWikiContent = $formatter->FormatWiki($strWikiContent);
 		}
-		
+
 		$strWikiContent = ChuWiki::ProcessWikiContent($strWikiContent);
-		
+
 		// Instanciation de la lib de rendu et rendu wiki
 		switch($g_aConfig['Renderer'])
 		{
