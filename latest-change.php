@@ -53,7 +53,7 @@ $astrLatestChanges = chuwiki::GetLatestChangePageList();
 $strLatestDate = FormatRfc1123Date(reset($astrLatestChanges));
 
 $strDomain = 'http://' . $_SERVER['SERVER_NAME'];
-$strURI = $strDomain . $k_strWikiURI;
+$strURI = $strDomain . $g_strWikiURI;
 
 $aEntries = array();
 foreach($astrLatestChanges as $strPage => $strDate)
@@ -71,9 +71,9 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
 ?>
 <rss version="2.0">
 <channel>
-	<title><?php echo $k_aConfig['Title'] ?></title>
+	<title><?php echo $g_aConfig['Title'] ?></title>
 	<link><?php echo $strURI ?></link>
-	<description><![CDATA[<?php echo $k_aLangConfig['ChangesPage'] ?>]]></description>
+	<description><![CDATA[<?php echo $g_aLangConfig['ChangesPage'] ?>]]></description>
 	<lastBuildDate><?php echo $strLatestDate ?></lastBuildDate>
 
 <?php
