@@ -799,7 +799,7 @@ class wiki2xhtmlBasic
 		# On vire les &nbsp; dans l'url
 		$url = str_replace('&nbsp;',' ',$url);
 		
-		if (ereg('^(.+)[.](gif|jpg|jpeg|png)$', $url) && !$no_image && $this->getOpt('active_auto_img'))
+		if (preg_match('/^(.+)[.](gif|jpg|jpeg|png)$/', $url) && !$no_image && $this->getOpt('active_auto_img'))
 		{
 			# On ajoute les dimensions de l'image si locale
 			# Idée de Stephanie
