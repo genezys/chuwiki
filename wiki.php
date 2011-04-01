@@ -24,7 +24,7 @@
 require(dirname(__FILE__) . '/sdk/sdk.php');
 /////////////////////////////////////////////////////////////
 
-$wiki = new Chuwiki();
+$wiki = Chuwiki::Instance();
 
 // Chargement des informations de la page
 $strPage = $wiki->GetCurrentPage();

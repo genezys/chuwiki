@@ -39,7 +39,7 @@ function BeginDocument($strMode)
 
 function WriteMenu()
 {
-	global $wiki;
+	$wiki = ChuWiki::Instance();
 	
 	WriteLine('<div id="Menu">');
 	WriteLine('<h2><a href="&Config.WikiURI;&Lang.MenuPage;">&Lang.MenuPage;</a></h2>');

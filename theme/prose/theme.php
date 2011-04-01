@@ -60,6 +60,8 @@ function BeginDocument($strMode)
 
 function WriteMenu()
 {
+	$wiki = ChuWiki::Instance();
+	
 	WriteLine('<div id="Menu">');
 	WriteLine('<h2><a href="&Config.WikiURI;&Lang.MenuPage;"   >&Lang.MenuPage;</a></h2>');
 	WriteLine('<ul>');
@@ -67,7 +69,7 @@ function WriteMenu()
 	WriteLine('<li><a href="&Config.WikiURI;&Lang.ChangesPage;">&Lang.ChangesPage;</a></li>');
 	WriteLine('<li><a href="&Config.WikiURI;&Lang.ListPage;"   >&Lang.ListPage;</a></li>');
 	WriteLine('</ul>');
-	echo ChuWiki::RenderPage(ChuWiki::GetLangVar('MenuPage'));
+	echo $wiki->RenderPage($wiki->GetLangVar('MenuPage'));
 	WriteLine('</div>');
 }
 

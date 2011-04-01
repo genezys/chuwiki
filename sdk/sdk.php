@@ -28,20 +28,10 @@ define('CHUWIKI_VERSION', 'ChuWiki 2.0α ($Rev$)');
 
 class ChuWiki
 {
-	var $g_aConfig;
-	var $g_aLangConfig;
-         
 	const EXTENSION_COMPRESSED = 'gz';
 	const EXTENSION_UNCOMPRESSED = 'txt';
-	var $g_bCanZlib;
-	var $g_bUseZlib;
-	var $fnChuFile;
-	var $fnChuOpen;
-	var $fnChuWrite;
-	var $fnChuClose;
-	var $g_strExtension;
-
-	var $g_strWikiURI;
+	
+	static $s_instance;
 
 	function ChuWiki()
 	{
@@ -73,12 +63,21 @@ class ChuWiki
 		// Active la compression du contenu si la zlib est disponible
 		if( $this->m_bUseZlib )
 		{
-			ob_start('ob_gzhandler');
+			@ob_start('ob_gzhandler');
 		}
 		else
 		{
-			ob_start();
+			@ob_start();
 		}
+	}
+	
+	/* static */ function Instance()
+	{
+		if ( ChuWiki::$s_instance == null ) 
+		{
+			ChuWiki::$s_instance = new ChuWiki();
+		}
+		return ChuWiki::$s_instance;
 	}
 	
 	/////////////////////////////////////////////////////////////////////////////////
@@ -1164,11 +1163,6 @@ class ChuWiki
 		{
 			header('Content-type: text/html; charset=' . $strCharset . '');
 		}
-	}
-	
-	function IsSpam($strContent, $strUserIp, $strUserAgent, $strReferer)
-	{
-		
 	}
 };
 
