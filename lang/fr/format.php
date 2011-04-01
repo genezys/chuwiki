@@ -28,8 +28,8 @@ class CLanguageFormat
 			'$1$2<sup>e$3</sup>$4',
 	
 			// Espace insécables
-			' $1',
-			'$1 '
+			'&nbsp;$1',
+			'$1&nbsp;'
 		);
 		
 		$strReturn = preg_replace($astrSources, $astrDestinations, $strHtmlContent);

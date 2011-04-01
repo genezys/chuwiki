@@ -26,47 +26,61 @@ error_reporting(E_ALL);
 
 define('CHUWIKI_VERSION', 'ChuWiki 2.0α ($Rev$)');
 
-// Chargement des configuration
-$g_aConfig = ChuWiki::ParseIniFile(dirname(__FILE__) . '/../configuration.ini');
-$g_aLangConfig = ChuWiki::ParseIniFile(dirname(__FILE__) . '/../' . $g_aConfig['LanguagePath'] . '/' . 'lang.ini');
-
-// Les fonctions d'ouverture de fichier doivent utiliser ou non 
-// la zlib selon que celle-ci est présente ou pas
-$g_bCanZlib = function_exists('gzfile');
-$g_bUseZlib = ( $g_bCanZlib && ! @$g_aConfig['NoCompression'] );
-
-$ChuFile = $g_bCanZlib ? 'gzfile' : 'file';
-$ChuOpen = $g_bUseZlib ? 'gzopen' : 'fopen';
-$ChuWrite = $g_bUseZlib ? 'gzwrite' : 'fwrite';
-$ChuClose = $g_bUseZlib ? 'gzclose' : 'fclose';
-$g_strCompressedExtension = 'gz';
-$g_strUncompressedExtension = 'txt';
-$g_strExtension = $g_bUseZlib ? $g_strCompressedExtension : $g_strUncompressedExtension;
-
-if( $g_bUseZlib )
-{
-	// Active la compression du contenu
-	ob_start('ob_gzhandler');
-}
-else
-{
-	ob_start();
-}
-
-
-///////////////////////////////////////////////////////////////////
-
-// Construction de l'URI où est installé ChuWiki
-$g_strWikiURI = dirname($_SERVER['SCRIPT_NAME']);
-if ( strlen($g_strWikiURI) < 2 )
-{
-	$g_strWikiURI = '';
-}
-$g_strWikiURI .= '/';
-
-
 class ChuWiki
 {
+	var $g_aConfig;
+	var $g_aLangConfig;
+         
+	const EXTENSION_COMPRESSED = 'gz';
+	const EXTENSION_UNCOMPRESSED = 'txt';
+	var $g_bCanZlib;
+	var $g_bUseZlib;
+	var $fnChuFile;
+	var $fnChuOpen;
+	var $fnChuWrite;
+	var $fnChuClose;
+	var $g_strExtension;
+
+	var $g_strWikiURI;
+
+	function ChuWiki()
+	{
+		$pathHome = dirname(__FILE__) . '/..';
+		$this->m_aConfig = $this->ParseIniFile($pathHome . '/configuration.ini');
+		$this->m_aLangConfig = $this->ParseIniFile($pathHome . '/' 
+						. $this->GetConfigVar('LanguagePath') . '/' . 'lang.ini');
+
+		// Les fonctions d'ouverture de fichier doivent utiliser ou non 
+		// la zlib selon que celle-ci est présente ou pas
+		$this->m_bCanZlib = function_exists('gzfile');
+		$this->m_bUseZlib = ( $this->m_bCanZlib && ! @$this->m_aConfig['NoCompression'] );
+		$this->fnChuFile = $this->m_bCanZlib ? 'gzfile' : 'file';
+		$this->fnChuOpen = $this->m_bUseZlib ? 'gzopen' : 'fopen';
+		$this->fnChuWrite = $this->m_bUseZlib ? 'gzwrite' : 'fwrite';
+		$this->fnChuClose = $this->m_bUseZlib ? 'gzclose' : 'fclose';
+		$this->m_strExtension = $this->m_bUseZlib
+								? ChuWiki::EXTENSION_COMPRESSED
+								: ChuWiki::EXTENSION_UNCOMPRESSED;
+
+		// Construction de l'URI où est installé ChuWiki
+		$this->m_strWikiURI = dirname($_SERVER['SCRIPT_NAME']);
+		if ( strlen($this->m_strWikiURI) < 2 )
+		{
+			$this->m_strWikiURI = '';
+		}
+		$this->m_strWikiURI .= '/';
+
+		// Active la compression du contenu si la zlib est disponible
+		if( $this->m_bUseZlib )
+		{
+			ob_start('ob_gzhandler');
+		}
+		else
+		{
+			ob_start();
+		}
+	}
+	
 	/////////////////////////////////////////////////////////////////////////////////
 	// Retourne un NCR avec le & changé en 0x00
 	// Gère les caractères interdits en XML
@@ -130,33 +144,39 @@ class ChuWiki
 	{
 		if( !file_exists($strFileName) )
 		{
-			ChuWiki::Error('Fichier de configuration manquant ' . $strFileName);
+			$this->Error('Fichier de configuration manquant ' . $strFileName);
 		}
 
 		$ini = parse_ini_file($strFileName);
 		
 		foreach( $ini as $key => $value )
 		{
-			$ini[$key] = ChuWiki::xhtmlspecialchars($value);
+			$ini[$key] = $this->xhtmlspecialchars($value);
 		}
 		
 		return $ini;
 	}
 
-	// Utile seulement pour les templates souhaitant
+	// Utile pour les templates souhaitant
 	// accéder en PHP à des variables de la config
 	function GetConfigVar($strVarName)
 	{
-		global $g_aConfig;
-		return $g_aConfig[$strVarName];
+		if( isset($this->m_aConfig[$strVarName]) )
+		{
+			return $this->m_aConfig[$strVarName];
+		}
+		return '';
 	}
 
-	// Utile seulement pour les templates souhaitant
+	// Utile pour les templates souhaitant
 	// accéder en PHP à des variables de la config
 	function GetLangVar($strVarName)
 	{
-		global $g_aLangConfig;
-		return $g_aLangConfig[$strVarName];
+		if( isset($this->m_aLangConfig[$strVarName]) )
+		{
+			return $this->m_aLangConfig[$strVarName];
+		}
+		return '';
 	}
 
 	function GetPostedValue($strName)
@@ -175,8 +195,6 @@ class ChuWiki
 
 	function GetUriInfo()
 	{
-		global $g_aConfig;
-
 		// L'URI peut être composée de 3 parties :
 		// le script, le séparateur de page, et la page
 		// Il faut extraire le script et la page	
@@ -194,7 +212,7 @@ class ChuWiki
 
 		$strPage = urldecode(substr($_SERVER['REQUEST_URI'], strlen($strScript) + 1));
 
-		$strSeparator = ChuWiki::GetPageSeparator();
+		$strSeparator = $this->GetPageSeparator();
 		$nSeparatorLength = strlen($strSeparator);
 		if( substr($strScript, -$nSeparatorLength) != $strSeparator )
 		{
@@ -221,17 +239,15 @@ class ChuWiki
 
 	function ErrorUnableToWrite()
 	{
-		ChuWiki::Error('Impossible d\'écrire cette page, veuillez vérifier que vous possédez les droits d\'écriture dans le répertoire des pages');
+		$this->Error('Impossible d\'écrire cette page, veuillez vérifier que vous possédez les droits d\'écriture dans le répertoire des pages');
 	}
 
 	function GetCurrentPage()
 	{
-		global $g_aConfig, $g_aLangConfig, $g_strWikiURI;
-
 		$strPage = '';
 		
 		// Récupère la page demandée
-		$aInfo = ChuWiki::GetUriInfo();
+		$aInfo = $this->GetUriInfo();
 		$strPage = $aInfo['Page'];
 		$strScript = $aInfo['Script'];
 
@@ -244,7 +260,7 @@ class ChuWiki
 		// Si la page n'est pas spécifiée, on redirige vers la page par défaut
 		if ( $strPage == '' )
 		{
-			header('Location: ' . $strScript . $g_aLangConfig['DefaultPage']);
+			header('Location: ' . $strScript . $this->m_aLangConfig['DefaultPage']);
 			exit();
 		}
 
@@ -263,9 +279,7 @@ class ChuWiki
 
 	function GetPageSeparator()
 	{
-		global $g_aConfig;
-		
-		if( $g_aConfig['UsePathInfo'] )
+		if( $this->GetConfigVar('UsePathInfo') )
 		{
 			return '/';
 		}
@@ -277,25 +291,23 @@ class ChuWiki
 
 	function GetPagePath()
 	{
-		global $g_aConfig;
-		return dirname(__FILE__) . '/../' . $g_aConfig['PagePath'];
+		return dirname(__FILE__) . '/../' . $this->GetConfigVar('PagePath');
 	}
 
 
 	function ComputePageDir($strPagePath, $strPage)
 	{
-		return $strPagePath . '/' . ChuWiki::FileNameEncode($strPage);
+		return $strPagePath . '/' . $this->FileNameEncode($strPage);
 	}
 
 	function GetPageDir($strPage)
 	{
-		return ChuWiki::ComputePageDir(ChuWiki::GetPagePath(), $strPage);
+		return $this->ComputePageDir($this->GetPagePath(), $strPage);
 	}
 
 	function GetScriptURI($strScriptName)
 	{
-		global $g_strWikiURI, $g_aConfig;
-		return $g_strWikiURI . $g_aConfig[$strScriptName . 'Script'] . ChuWiki::GetPageSeparator();
+		return $this->m_strWikiURI . $this->GetConfigVar($strScriptName . 'Script') . $this->GetPageSeparator();
 	}
 
 	// Merci à Darken pour cette fonction
@@ -353,7 +365,7 @@ class ChuWiki
 				{
 					// Bad byte sequence starter
 					$strBeg = substr($str, 0, $iSrc);
-					$strBeg = ChuWiki::XhtmlSpecialChars($strBeg);
+					$strBeg = $this->XhtmlSpecialChars($strBeg);
 					echo "<p>$strBeg &lt;-- BAD UTF-8 SEQUENCE STARTER</p>";
 					return false;
 				}
@@ -365,7 +377,7 @@ class ChuWiki
 				{
 					// Bad byte in sequence
 					$strBeg = substr($str, 0, $iSrc);
-					$strBeg = ChuWiki::XhtmlSpecialChars($strBeg);
+					$strBeg = $this->XhtmlSpecialChars($strBeg);
 					echo "<p>$strBeg &lt;-- BAD UTF-8 SEQUENCE BYTE</p>";
 					return false;
 				}
@@ -388,20 +400,19 @@ class ChuWiki
 
 	function LoadFile($strFilePath)
 	{
-		global $g_aConfig, $ChuFile;
 		if ( !is_file($strFilePath) )
 		{
 			return '';
 		}
 
-		$strContent = implode('', $ChuFile($strFilePath));
+		$strContent = implode('', call_user_func($this->fnChuFile, $strFilePath));
 		$strContent = str_replace("\r", '', $strContent);
 
-		if( @$g_aConfig['VerifyUtf8'] )
+		if( $this->GetConfigVar('VerifyUtf8') )
 		{
-			if( !ChuWiki::VerifyUtf8($strContent) )
+			if( !$this->VerifyUtf8($strContent) )
 			{
-				ChuWiki::Error('Le fichier ' . $strFilePath . ' n\'est pas correctement enregistré en UTF-8');
+				$this->Error('Le fichier ' . $strFilePath . ' n\'est pas correctement enregistré en UTF-8');
 			}
 		}	
 		return $strContent;
@@ -435,11 +446,9 @@ class ChuWiki
 
 	function GetWikiContentFile($strPage, $strDate)
 	{
-		global $g_strCompressedExtension, $g_strUncompressedExtension;
-
-		$strFileBase = ChuWiki::GetPageDir($strPage) .  '/' . $strDate . '.';
-		$strCompressedFile = $strFileBase . $g_strCompressedExtension;
-		$strUncompressedFile = $strFileBase . $g_strUncompressedExtension;
+		$strFileBase = $this->GetPageDir($strPage) .  '/' . $strDate . '.';
+		$strCompressedFile = $strFileBase . ChuWiki::EXTENSION_COMPRESSED;
+		$strUncompressedFile = $strFileBase . ChuWiki::EXTENSION_UNCOMPRESSED;
 
 		if( file_exists($strCompressedFile) )
 		{
@@ -454,50 +463,48 @@ class ChuWiki
 
 	function GetLatestDate($strPage)
 	{
-		$strPageDir = ChuWiki::GetPageDir($strPage);
-		$strDateLatestFilePath = ChuWiki::GetLatestDateFilePath($strPageDir);
+		$strPageDir = $this->GetPageDir($strPage);
+		$strDateLatestFilePath = $this->GetLatestDateFilePath($strPageDir);
 		$strDateLatest = @implode('', file($strDateLatestFilePath));
 
 		// Si le cache n'existe pas ou que la page indiquée a été supprimée
 		// On va devoir recréer le cache
 		if( $strDateLatest == '' )
 		{
-			$aHistory = ChuWiki::GetHistory($strPage);
+			$aHistory = $this->GetHistory($strPage);
 			$strDateLatest = reset($aHistory);
 
 			// Comme on est passé par l'ancienne méthode 
 			// qui n'utilisait pas le cache,
 			// on peut maintenant enregistrer le cache
-			ChuWiki::WriteFile($strDateLatestFilePath, $strDateLatest);
+			$this->WriteFile($strDateLatestFilePath, $strDateLatest);
 		}
 		return $strDateLatest;
 	}
 
 	function GetWikiContent($strPage)
 	{
-		$strLatestDate = ChuWiki::GetLatestDate($strPage);
-		return ChuWiki::GetSavedWikiContent($strPage, $strLatestDate);
+		$strLatestDate = $this->GetLatestDate($strPage);
+		return $this->GetSavedWikiContent($strPage, $strLatestDate);
 	}
 	
 	function GetModifiedWikiContent($strPage)
 	{
-		$strOriginalWikiContent = ChuWiki::GetWikiContent($strPage);
-		return ChuWiki::AddSpecialWikiContent($strPage, $strOriginalWikiContent);
+		$strOriginalWikiContent = $this->GetWikiContent($strPage);
+		return $this->AddSpecialWikiContent($strPage, $strOriginalWikiContent);
 	}
 	
 	function GetSavedWikiContent($strPage, $strDate)
 	{
-		global $g_strExtension;
-
-		$strSavePath = ChuWiki::GetWikiContentFile($strPage, $strDate);
-		$strContent =  ChuWiki::LoadFile($strSavePath);
+		$strSavePath = $this->GetWikiContentFile($strPage, $strDate);
+		$strContent =  $this->LoadFile($strSavePath);
 		return $strContent;
 	}
 
 	function RenderPage($strPage)
 	{
-		$strWikiContent = ChuWiki::GetModifiedWikiContent($strPage);		
-		return ChuWiki::Render($strWikiContent);
+		$strWikiContent = $this->GetModifiedWikiContent($strPage);		
+		return $this->Render($strWikiContent);
 	}
 
 	function GenerateInclude($strParams)
@@ -513,15 +520,15 @@ class ChuWiki
 			$astrParts = explode('=', $strParam, 2);
 			$strParam = trim($astrParts[0]);
 			$strValue = trim($astrParts[1]);
-			ChuWiki::AddReplacement($astrReplacements, $strParam, $strValue);
+			$this->AddReplacement($astrReplacements, $strParam, $strValue);
 		}
 
 		// Récupère le contenu wiki à inclure
-		$strContent = ChuWiki::GetModifiedWikiContent($strPage);
-		$strContent = ChuWiki::ReplaceAll($strContent, $astrReplacements);
+		$strContent = $this->GetModifiedWikiContent($strPage);
+		$strContent = $this->ReplaceAll($strContent, $astrReplacements);
 
 		// Gère les commandes dans le contenu inclus
-		$strContent = ChuWiki::ProcessWikiContent($strContent);
+		$strContent = $this->ProcessWikiContent($strContent);
 
 		// Inclue le contenu modifié
 		return $strContent;
@@ -563,8 +570,6 @@ class ChuWiki
 
 	function GenerateCategory($strParams)
 	{
-		global $g_aLangConfig;
-
 		// Récupère le nom des catégories
 		$astrCategories = explode('|', $strParams);
 
@@ -572,7 +577,7 @@ class ChuWiki
 		foreach( $astrCategories as $i => $strCategory )
 		{
 			$strCategory = trim($strCategory);
-			$astrCategories[$i] = '[' . $strCategory . '|' . $g_aLangConfig['CategoryPage'] . ' ' . $strCategory . ']';
+			$astrCategories[$i] = '[' . $strCategory . '|' . $this->m_aLangConfig['CategoryPage'] . ' ' . $strCategory . ']';
 		}
 
 		// Construit la ligne wiki correspondante
@@ -601,15 +606,15 @@ class ChuWiki
 				$strSpecial = '';
 				if( $strCommand == 'include' )
 				{
-					$strSpecial = ChuWiki::GenerateInclude($strParams);
+					$strSpecial = $this->GenerateInclude($strParams);
 				}
 				else if( $strCommand == 'toc' )
 				{
-					$strSpecial = ChuWiki::GenerateTableOFContents($astrLines);
+					$strSpecial = $this->GenerateTableOFContents($astrLines);
 				}
 				else if( $strCommand == 'category' )
 				{
-					$strSpecial = ChuWiki::GenerateCategory($strParams);
+					$strSpecial = $this->GenerateCategory($strParams);
 				}
 				
 				if( strlen($strSpecial) > 0 )
@@ -626,15 +631,13 @@ class ChuWiki
 	
 	function Render($strWikiContent)
 	{
-		global $g_aConfig, $g_aLangConfig;
-
 		if ( $strWikiContent == '' )
 		{
-			$strWikiContent = $g_aLangConfig['NoWikiContent'];
+			$strWikiContent = $this->m_aLangConfig['NoWikiContent'];
 		}
 
 		// On utilise le fichier de formatage de la langue s'il existe	
-		$strFileFormat = $g_aConfig['LanguagePath'] . '/format.php';
+		$strFileFormat = $this->GetConfigVar('LanguagePath') . '/format.php';
 		$formatter = null;
 		if( file_exists($strFileFormat) )
 		{
@@ -655,10 +658,10 @@ class ChuWiki
 			$strWikiContent = $formatter->FormatWiki($strWikiContent);
 		}
 
-		$strWikiContent = ChuWiki::ProcessWikiContent($strWikiContent);
+		$strWikiContent = $this->ProcessWikiContent($strWikiContent);
 
 		// Instanciation de la lib de rendu et rendu wiki
-		switch($g_aConfig['Renderer'])
+		switch( $this->GetConfigVar('Renderer') )
 		{
 		case 'WikiRenderer':
 			if( !class_exists("WikiRenderer") )
@@ -681,12 +684,12 @@ class ChuWiki
 			break;
 
 		default:
-			ChuWiki::Error('Erreur dans le fichier de configuration : Aucun renderer ou mauvais renderer spécifié. Seulement WikiRenderer ou wiki2xhtml sont autorisés.');
+			$this->Error('Erreur dans le fichier de configuration : Aucun renderer ou mauvais renderer spécifié. Seulement WikiRenderer ou wiki2xhtml sont autorisés.');
 			break;
 		}
 
 		// Sans PathInfo, il faut mettre un ? devant les liens vers les pages internes
-		if( !$g_aConfig['UsePathInfo'] )
+		if( !$this->GetConfigVar('UsePathInfo') )
 		{
 			$strHtmlContent = preg_replace('/href="([^"]*)"/', 'href="?\1"', $strHtmlContent);
 			$strHtmlContent = preg_replace('/href="\?(\.\..*)"/', 'href="\1"', $strHtmlContent);
@@ -695,13 +698,14 @@ class ChuWiki
 			$strHtmlContent = preg_replace('/href="\?(#.*)"/', 'href="\1"', $strHtmlContent);
 		}
 
-		if ( $g_aConfig['SmileyPath'] != '' )
+		if ( $this->GetConfigVar('SmileyPath') != '' )
 		{
+			// Only load the smiley-replacer if we have smiley to replace
 			if( !function_exists("MakeImageSmileys") )
 			{
 				require(dirname(__FILE__) . '/smiley-replacer.php');
 			}
-			MakeImageSmileys($strHtmlContent);
+			MakeImageSmileys($this, $strHtmlContent);
 		}
 
 		// Modification du contenu HTML par la langue
@@ -715,44 +719,41 @@ class ChuWiki
 
 	function LoadTemplate($strTemplate)
 	{
-		global $g_aConfig;
-
-		$strTemplatePath = $g_aConfig['ThemePath'] . '/' . $strTemplate . '.php';
+		$strTemplatePath = $this->GetConfigVar('ThemePath') . '/' . $strTemplate . '.php';
 		
 		// Un chargement avant pour vérifier l'intégrité
-		ChuWiki::LoadFile($strTemplatePath);
+		$this->LoadFile($strTemplatePath);
 		
-		return ChuWiki::InterpretPhpFile($strTemplatePath);
+		return $this->InterpretPhpFile($strTemplatePath);
 	}
 
 	function BuildStandardReplacements()
 	{
-		global $g_aConfig, $g_aLangConfig, $g_strWikiURI;
-
 		$astrReplacements = array('Vars' => array(), 'Values' => array());
 
 		// Ajout des variables du fichier configuration.ini
-		foreach($g_aConfig as $strVar => $strValue)
+		foreach( $this->m_aConfig as $strVar => $strValue )
 		{
-			ChuWiki::AddReplacement($astrReplacements, 'Config.' . $strVar, $strValue);
+			$this->AddReplacement($astrReplacements, 'Config.' . $strVar, $strValue);
 		}
 
 		// Ajout des variables de configurations supplémentaires
-		ChuWiki::AddReplacement($astrReplacements, 'Config.URI', $g_strWikiURI);
-		ChuWiki::AddReplacement($astrReplacements, 'Config.Version', CHUWIKI_VERSION);
-		ChuWiki::AddReplacement($astrReplacements, 'Config.PageSeparator', ChuWiki::GetPageSeparator());
-		ChuWiki::AddReplacement($astrReplacements, 'Config.WikiURI', ChuWiki::GetScriptURI('Wiki'));
-		ChuWiki::AddReplacement($astrReplacements, 'Config.EditURI', ChuWiki::GetScriptURI('Edit'));
-		ChuWiki::AddReplacement($astrReplacements, 'Config.HistoryURI', ChuWiki::GetScriptURI('History'));
+		$this->AddReplacement($astrReplacements, 'Config.URI', $this->m_strWikiURI);
+		$this->AddReplacement($astrReplacements, 'Config.Version', CHUWIKI_VERSION);
+		$this->AddReplacement($astrReplacements, 'Config.PageSeparator', $this->GetPageSeparator());
+		$this->AddReplacement($astrReplacements, 'Config.WikiURI', $this->GetScriptURI('Wiki'));
+		$this->AddReplacement($astrReplacements, 'Config.EditURI', $this->GetScriptURI('Edit'));
+		$this->AddReplacement($astrReplacements, 'Config.HistoryURI', $this->GetScriptURI('History'));
 
 		// Ajout des variables da la langue
-		foreach($g_aLangConfig as $strVar => $strValue)
+		foreach($this->m_aLangConfig as $strVar => $strValue)
 		{
-			ChuWiki::AddReplacement($astrReplacements, 'Lang.' . $strVar, $strValue);
+			$this->AddReplacement($astrReplacements, 'Lang.' . $strVar, $strValue);
 		}
 
 		// Ajout des variables de langue supplémentaires
-		ChuWiki::AddReplacement($astrReplacements, 'Lang.Rules', ChuWiki::LoadFile($g_aConfig['LanguagePath'] . '/rules.html'));
+		$this->AddReplacement($astrReplacements, 'Lang.Rules', 
+			$this->LoadFile($this->GetConfigVar('LanguagePath') . '/rules.html'));
 		
 		return $astrReplacements;
 	}
@@ -779,43 +780,37 @@ class ChuWiki
 
 	function Save($strPage, $strWikiContent)
 	{
-		global $g_strExtension, $g_aConfig, $ChuOpen, $ChuWrite, $ChuClose;
-
 		// Création du répertoire des pages
-		$strPagePath = ChuWiki::GetPagePath();
-		ChuWiki::CreateDir($strPagePath);
+		$strPagePath = $this->GetPagePath();
+		$this->CreateDir($strPagePath);
 		
 		// Création du répertoire de la page
-		$strPageDir = ChuWiki::ComputePageDir($strPagePath, $strPage);
-		ChuWiki::CreateDir($strPageDir);
+		$strPageDir = $this->ComputePageDir($strPagePath, $strPage);
+		$this->CreateDir($strPageDir);
 
 		if( file_exists($strPageDir . '/lock.txt') )
 		{
 			// Cette page est protégée
-			ChuWiki::ErrorUnableToWrite();
+			$this->ErrorUnableToWrite();
 		}
 
 		// On enregistre le contenu du fichier
-		$date = time();
-		if( isset($g_aConfig['TimeShift']) )
-		{
-			$date += intval($g_aConfig['TimeShift']);
-		}
+		$date = time() + intval($this->GetConfigVar('TimeShift'));
 		$strDate = date('YmdHis', $date);
-		$strSavePath = $strPageDir . '/' . $strDate . '.' . $g_strExtension;
+		$strSavePath = $strPageDir . '/' . $strDate . '.' . $this->m_strExtension;
 
-		$file = $ChuOpen($strSavePath, 'w9');
+		$file = call_user_func($this->fnChuOpen, $strSavePath, 'w9');
 		if ( $file === FALSE )
 		{
 			// Impossible d'ouvrir le fichier en écriture
-			ChuWiki::ErrorUnableToWrite();
+			$this->ErrorUnableToWrite();
 		}
-		$ChuWrite($file, $strWikiContent);
-		$ChuClose($file);
+		call_user_func($this->fnChuWrite, $file, $strWikiContent);
+		call_user_func($this->fnChuClose, $file);
 		@chmod($strSavePath, 0777);
 
 		// On enregistre le fichier indiquant le dernier changement	
-		ChuWiki::WriteFile(ChuWiki::GetLatestDateFilePath($strPageDir), $strDate);
+		$this->WriteFile($this->GetLatestDateFilePath($strPageDir), $strDate);
 	}
 
 	function FormatDate($date)
@@ -836,10 +831,8 @@ class ChuWiki
 
 	function GetHistory($strPage)
 	{
-		global $g_aConfig;
-
-		$strPageDir = ChuWiki::GetPageDir($strPage);
-		$strDateLatestFilePath = ChuWiki::GetLatestDateFilePath($strPageDir);
+		$strPageDir = $this->GetPageDir($strPage);
+		$strDateLatestFilePath = $this->GetLatestDateFilePath($strPageDir);
 
 		$aHistory = array();
 
@@ -854,7 +847,7 @@ class ChuWiki
 					break;
 				}
 				$strFilePath = $strPageDir . '/' . $strEntry;
-				if ( ChuWiki::IsArchiveFile($strEntry) )
+				if ( $this->IsArchiveFile($strEntry) )
 				{
 					$astr = explode('.', $strEntry);
 					$aHistory[] = $astr[0];
@@ -870,9 +863,7 @@ class ChuWiki
 
 	function GetPageList()
 	{
-		global $g_aConfig;
-
-		$strPagePath = ChuWiki::GetPagePath();
+		$strPagePath = $this->GetPagePath();
 
 		$astrList = array();
 		if( !is_dir($strPagePath) )
@@ -892,7 +883,7 @@ class ChuWiki
 			if ( $strEntry != '.' && $strEntry != '..' && is_dir($strFullPath) )
 			{
 				$strEntry = rawurldecode($strEntry);
-				$astrList[$strEntry] = ChuWiki::GetLatestDate($strEntry);
+				$astrList[$strEntry] = $this->GetLatestDate($strEntry);
 			}
 		}
 		closedir($dir);
@@ -902,7 +893,7 @@ class ChuWiki
 
 	function GetSortedPageList()
 	{
-		$astrList = ChuWiki::GetPageList();
+		$astrList = $this->GetPageList();
 		ksort($astrList);
 
 		return $astrList;
@@ -910,7 +901,7 @@ class ChuWiki
 
 	function GetLatestChangePageList()
 	{
-		$astrList = ChuWiki::GetPageList();
+		$astrList = $this->GetPageList();
 		arsort($astrList);
 
 		return $astrList;
@@ -918,9 +909,7 @@ class ChuWiki
 
 	function GetPageListContent()
 	{
-		global $g_aConfig;
-
-		$astrList = ChuWiki::GetSortedPageList();
+		$astrList = $this->GetSortedPageList();
 
 		$strContent = '';
 		foreach($astrList as $strEntry => $date)
@@ -933,11 +922,9 @@ class ChuWiki
 
 	function GetRecentChangeContent()
 	{
-		global $g_aConfig, $g_strWikiURI;
-
 		define('CookieName', 'RecentChanges');
 
-		$astrList = ChuWiki::GetLatestChangePageList();
+		$astrList = $this->GetLatestChangePageList();
 
 		// Récupération de la dernière visite
 		$dateLastVisit = isset($_COOKIE[CookieName]) ? $_COOKIE[CookieName] : 0;
@@ -977,7 +964,7 @@ class ChuWiki
 
 		// Enregistrement de la dernière date
 		$dateLatest = reset($astrList);
-		setcookie(CookieName, $dateLatest, time() + 3600 * 24 * 365, $g_strWikiURI);
+		setcookie(CookieName, $dateLatest, time() + 3600 * 24 * 365, $this->m_strWikiURI);
 
 		return $strContent;
 	}
@@ -986,7 +973,7 @@ class ChuWiki
 	{
 		if( isset($_POST['Search']) )
 		{
-			$strLocation = ChuWiki::GetScriptURI('Wiki') . ChuWiki::GetLangVar('SearchPage') . ' ' . ChuWiki::GetPostedValue('Search');
+			$strLocation = $this->GetScriptURI('Wiki') . $this->GetLangVar('SearchPage') . ' ' . $this->GetPostedValue('Search');
 			header('Location: ' . $strLocation);
 			exit;
 		}
@@ -1001,7 +988,7 @@ class ChuWiki
 		$aResults = array();
 		$strContent = '';
 
-		$astrPages = ChuWiki::GetPageList();
+		$astrPages = $this->GetPageList();
 		foreach($astrPages as $strPage => $date)
 		{
 			$nScore = 0;
@@ -1011,7 +998,7 @@ class ChuWiki
 				$nScore += 20;
 			}
 
-			$strWiki = ChuWiki::GetWikiContent($strPage);
+			$strWiki = $this->GetWikiContent($strPage);
 			$astrLines = explode("\n", $strWiki);
 
 			foreach($astrLines as $strLine)
@@ -1067,10 +1054,10 @@ class ChuWiki
 		$aResults = array();
 		$strContent = '';
 
-		$astrPages = ChuWiki::GetPageList();
+		$astrPages = $this->GetPageList();
 		foreach($astrPages as $strPage => $date)
 		{
-			$strWiki = ChuWiki::GetWikiContent($strPage);
+			$strWiki = $this->GetWikiContent($strPage);
 			$astrLines = explode("\n", $strWiki);
 
 			$bFound = false;
@@ -1116,40 +1103,38 @@ class ChuWiki
 
 	function GetSpecialWikiContent($strPage)
 	{
-		global $g_aLangConfig;
-
 		$strSpecial = '';
 
 		// Si c'est la page de listage, on ajoute la liste après.
-		if ( $strPage == $g_aLangConfig['ListPage'] )
+		if ( $strPage == $this->m_aLangConfig['ListPage'] )
 		{
-			$strSpecial .= ChuWiki::GetPageListContent();
+			$strSpecial .= $this->GetPageListContent();
 		}
 
 		// Si c'est la page de changement, on les ajoute après
-		if ( $strPage == $g_aLangConfig['ChangesPage'] )
+		if ( $strPage == $this->m_aLangConfig['ChangesPage'] )
 		{
-			$strSpecial .= ChuWiki::GetRecentChangeContent();
+			$strSpecial .= $this->GetRecentChangeContent();
 		}
 
 		// Si c'est la page de recherche, on ajoute les résultats après
 		// La requête est passée à la suite du nom de la page
-		$strSearchPage = @$g_aLangConfig['SearchPage'];
+		$strSearchPage = @$this->m_aLangConfig['SearchPage'];
 		$nSearchPageLength = strlen($strSearchPage);
 		if( $nSearchPageLength > 0 && substr($strPage, 0, $nSearchPageLength) == $strSearchPage )
 		{
 			$strQuery = substr($strPage, $nSearchPageLength);
-			$strSpecial .= ChuWiki::GetSearchContent($strQuery);
+			$strSpecial .= $this->GetSearchContent($strQuery);
 		}
 
 		// Si c'est la page de catégorie, on ajoute les résultats après
 		// La requête est passée à la suite du nom de la page
-		$strCategoryPage = @$g_aLangConfig['CategoryPage'];
+		$strCategoryPage = @$this->m_aLangConfig['CategoryPage'];
 		$nCategoryPageLength = strlen($strCategoryPage);
 		if( $nCategoryPageLength > 0 && substr($strPage, 0, $nCategoryPageLength) == $strCategoryPage )
 		{
 			$strQuery = substr($strPage, $nCategoryPageLength);
-			$strSpecial .= ChuWiki::GetCategoryContent($strQuery);
+			$strSpecial .= $this->GetCategoryContent($strQuery);
 		}
 
 		return $strSpecial;
@@ -1157,7 +1142,7 @@ class ChuWiki
 	
 	function AddSpecialWikiContent($strPage, $strWikiContent)
 	{
-		$strSpecialWikiContent = ChuWiki::GetSpecialWikiContent($strPage);
+		$strSpecialWikiContent = $this->GetSpecialWikiContent($strPage);
 		return trim($strWikiContent . "\n" . $strSpecialWikiContent);
 	}	
 
@@ -1179,6 +1164,11 @@ class ChuWiki
 		{
 			header('Content-type: text/html; charset=' . $strCharset . '');
 		}
+	}
+	
+	function IsSpam($strContent, $strUserIp, $strUserAgent, $strReferer)
+	{
+		
 	}
 };
 

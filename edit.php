@@ -25,59 +25,61 @@
 require(dirname(__FILE__) . '/sdk/sdk.php');
 /////////////////////////////////////////////////////////////
 
+$wiki = new ChuWiki();
+
 // Chargement des informations de la page
-$strPage = ChuWiki::GetCurrentPage();
+$strPage = $wiki->GetCurrentPage();
 
 if( isset($_POST['Preview']) )
 {
 	// En mode preview
-	$strWikiContent = ChuWiki::GetPostedValue('Wiki');
+	$strWikiContent = $wiki->GetPostedValue('Wiki');
 }
 else if( isset($_POST['Save']) )
 {
 	// En mode sauvegarde
-	$strWikiContent = ChuWiki::GetPostedValue('Wiki');
+	$strWikiContent = $wiki->GetPostedValue('Wiki');
 	
 	// Enregistrement de la page
-	ChuWiki::Save($strPage, $strWikiContent);
+	$wiki->Save($strPage, $strWikiContent);
 
 	// Redirection vers l'affichage de la page
-	header('Location: ' . ChuWiki::GetScriptURI('Wiki')  . ChuWiki::FileNameEncode($strPage));
+	header('Location: ' . $wiki->GetScriptURI('Wiki')  . $wiki->FileNameEncode($strPage));
 	exit();
 }
 else
 {
 	// En mode standard
 	// Chargement du contenu wiki pour cette page
-	$strWikiContent = ChuWiki::GetWikiContent($strPage);
+	$strWikiContent = $wiki->GetWikiContent($strPage);
 }
 
 // On ajoute du contenu supplémentaire pour certaines pages comme la liste ou les changements
-$strModifiedWikiContent = ChuWiki::AddSpecialWikiContent($strPage, $strWikiContent);
+$strModifiedWikiContent = $wiki->AddSpecialWikiContent($strPage, $strWikiContent);
 
 // Rendu wiki
-$strHtmlContent = ChuWiki::Render($strModifiedWikiContent);
+$strHtmlContent = $wiki->Render($strModifiedWikiContent);
 
 // On doit retirer les caractères non xhtml pour le contenu wiki qui sera édité
-$strWikiContent = ChuWiki::xhtmlspecialchars($strWikiContent);
+$strWikiContent = $wiki->xhtmlspecialchars($strWikiContent);
 
 ////////////////////////////////////////////////////////////
 
 // Chargement du template
-$strContent = ChuWiki::LoadTemplate('edit');
+$strContent = $wiki->LoadTemplate('edit');
 
 // Les premiers remplacements sont en fonction du fichier de config
-$astrReplacements = ChuWiki::BuildStandardReplacements();
+$astrReplacements = $wiki->BuildStandardReplacements();
 
 // Ajoute les remplacements « runtime »
-ChuWiki::AddReplacement($astrReplacements, 'Page.Name', htmlspecialchars($strPage));
-ChuWiki::AddReplacement($astrReplacements, 'Page.Wiki', $strWikiContent);
-ChuWiki::AddReplacement($astrReplacements, 'Page.Html', $strHtmlContent);
+$wiki->AddReplacement($astrReplacements, 'Page.Name', htmlspecialchars($strPage));
+$wiki->AddReplacement($astrReplacements, 'Page.Wiki', $strWikiContent);
+$wiki->AddReplacement($astrReplacements, 'Page.Html', $strHtmlContent);
 
 // Applique les remplacements
-$strContent = ChuWiki::ReplaceAll($strContent, $astrReplacements);
+$strContent = $wiki->ReplaceAll($strContent, $astrReplacements);
 
 ////////////////////////////////////////////////////////////
-ChuWiki::WriteXhtmlHeader();
+$wiki->WriteXhtmlHeader();
 echo $strContent;
 ?>

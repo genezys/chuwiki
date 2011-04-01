@@ -22,10 +22,10 @@
 // ***** END LICENSE BLOCK *****
 ////////////////////////////////////////////////////////////////////////////////
 
-function ParseSmileyFile($strFileName)
+function ParseSmileyFile($wiki, $strFileName)
 {
 	// Chargement du fichier des smileys
-	$strContent = ChuWiki::LoadFile($strFileName);
+	$strContent = $wiki->LoadFile($strFileName);
 
 	// Les smileys sont traités au niveau HTML, il faut donc convertir 
 	// les caractères spéciaux éventuels
@@ -65,15 +65,13 @@ function ParseSmileyFile($strFileName)
 	return $aVars;
 }
 
-function MakeImageSmileys(&$strContent)
+function MakeImageSmileys($wiki, &$strContent)
 {
-	global $g_strWikiURI, $g_aConfig;
-
-	$strSmileyPackPath = $g_aConfig['SmileyPath'] . '/';
-	$astrSmileys = ParseSmileyFile($strSmileyPackPath . 'smileys.ini');
+	$strSmileyPackPath = $wiki->GetConfigVar('SmileyPath') . '/';
+	$astrSmileys = ParseSmileyFile($wiki, $strSmileyPackPath . 'smileys.ini');
 
 	$Replacer = new CSmileyReplacer($astrSmileys, true, 
-									$g_strWikiURI . $strSmileyPackPath);
+									$wiki->m_strWikiURI . $strSmileyPackPath);
 	$strContent = $Replacer->Replace($strContent);
 }
 

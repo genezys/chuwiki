@@ -25,44 +25,46 @@
 require(dirname(__FILE__) . '/sdk/sdk.php');
 /////////////////////////////////////////////////////////////
 
+$wiki = new ChuWiki();
+
 // Chargement des informations de la page
-$strPage = ChuWiki::GetCurrentPage();
-$strDate = ChuWiki::GetPostedValue('Date');
+$strPage = $wiki->GetCurrentPage();
+$strDate = $wiki->GetPostedValue('Date');
 
 if ( isset($_POST['Preview']) )
 {
 	// Chargement du contenu wiki sauvegardé pour cette page
-	$strWikiContent = ChuWiki::GetSavedWikiContent($strPage, $strDate);
+	$strWikiContent = $wiki->GetSavedWikiContent($strPage, $strDate);
 }
 else if ( isset($_POST['Save']) && $strDate !=  '' )
 {
 	// En mode restauration
-	$strWikiContent = ChuWiki::GetSavedWikiContent($strPage, $strDate);
+	$strWikiContent = $wiki->GetSavedWikiContent($strPage, $strDate);
 
 	// Enregistremet de la page
-	ChuWiki::Save($strPage, $strWikiContent);
+	$wiki->Save($strPage, $strWikiContent);
 
 	// Redirection vers l'affichage de la page
-	header('Location: ' . ChuWiki::GetScriptURI('Wiki')  . ChuWiki::FileNameEncode($strPage));
+	header('Location: ' . $wiki->GetScriptURI('Wiki')  . $wiki->FileNameEncode($strPage));
 	exit();
 }
 else
 {
 	// Chargement du contenu wiki pour cette page
-	$strWikiContent = ChuWiki::GetWikiContent($strPage);
+	$strWikiContent = $wiki->GetWikiContent($strPage);
 }
 
 // On ajoute du contenu supplémentaire pour certaines pages comme la liste ou les changements
-$strModifiedWikiContent = ChuWiki::AddSpecialWikiContent($strPage, $strWikiContent);
+$strModifiedWikiContent = $wiki->AddSpecialWikiContent($strPage, $strWikiContent);
 
 // Rendu wiki
-$strHtmlContent = ChuWiki::Render($strModifiedWikiContent);
+$strHtmlContent = $wiki->Render($strModifiedWikiContent);
 
 // Récupération de la liste des sauvegardes pour ce fichier
-$aHistory = ChuWiki::GetHistory($strPage);
+$aHistory = $wiki->GetHistory($strPage);
 
 // Contruction de la liste des historiques avec sélection de la date choisie
-$datePost = ChuWiki::GetPostedValue('Date');
+$datePost = $wiki->GetPostedValue('Date');
 if ( $datePost == '')
 {
 	$datePost = reset($aHistory);
@@ -82,27 +84,27 @@ else
 		{
 			$strHistory .= ' selected="selected"';
 		}
-		$strHistory .= '>' . ChuWiki::FormatDate($date) . '</option>' . "\n";
+		$strHistory .= '>' . $wiki->FormatDate($date) . '</option>' . "\n";
 	}
 }
 /////////////////////////////////////////////////////////////
 
 // Chargement du template
-$strContent = ChuWiki::LoadTemplate('history');
+$strContent = $wiki->LoadTemplate('history');
 
 // Les premiers remplacements sont en fonction du fichier de config
-$astrReplacements = ChuWiki::BuildStandardReplacements();
+$astrReplacements = $wiki->BuildStandardReplacements();
 
 // Ajoute les remplacements « runtime »
-ChuWiki::AddReplacement($astrReplacements, 'Page.Name', htmlspecialchars($strPage));
-ChuWiki::AddReplacement($astrReplacements, 'Page.Wiki', $strWikiContent);
-ChuWiki::AddReplacement($astrReplacements, 'Page.Html', $strHtmlContent);
-ChuWiki::AddReplacement($astrReplacements, 'Page.History', $strHistory);
+$wiki->AddReplacement($astrReplacements, 'Page.Name', htmlspecialchars($strPage));
+$wiki->AddReplacement($astrReplacements, 'Page.Wiki', $strWikiContent);
+$wiki->AddReplacement($astrReplacements, 'Page.Html', $strHtmlContent);
+$wiki->AddReplacement($astrReplacements, 'Page.History', $strHistory);
 
 // Applique les remplacements
-$strContent = ChuWiki::ReplaceAll($strContent, $astrReplacements);
+$strContent = $wiki->ReplaceAll($strContent, $astrReplacements);
 
 /////////////////////////////////////////////////////////////
-ChuWiki::WriteXhtmlHeader();
+$wiki->WriteXhtmlHeader();
 echo $strContent;
 ?>

@@ -24,35 +24,37 @@
 require(dirname(__FILE__) . '/sdk/sdk.php');
 /////////////////////////////////////////////////////////////
 
+$wiki = new Chuwiki();
+
 // Chargement des informations de la page
-$strPage = ChuWiki::GetCurrentPage();
+$strPage = $wiki->GetCurrentPage();
 
 // Chargement du contenu wiki pour cette page
-$strWikiContent = ChuWiki::GetWikiContent($strPage);
+$strWikiContent = $wiki->GetWikiContent($strPage);
 
 // Ajout des contenus spéciaux de certaines pages
-$strModifiedWikiContent = ChuWiki::AddSpecialWikiContent($strPage, $strWikiContent);
+$strModifiedWikiContent = $wiki->AddSpecialWikiContent($strPage, $strWikiContent);
 
 // Rendu wiki
-$strHtmlContent = ChuWiki::Render($strModifiedWikiContent);
+$strHtmlContent = $wiki->Render($strModifiedWikiContent);
 
 /////////////////////////////////////////////////////////////
 
 // Chargement du template
-$strContent = ChuWiki::LoadTemplate('wiki');
+$strContent = $wiki->LoadTemplate('wiki');
 
 // Les premiers remplacements sont en fonction du fichier de config
-$astrReplacements = ChuWiki::BuildStandardReplacements();
+$astrReplacements = $wiki->BuildStandardReplacements();
 
 // Ajoute les remplacements « runtime »
-ChuWiki::AddReplacement($astrReplacements, 'Page.Name', htmlspecialchars($strPage));
-ChuWiki::AddReplacement($astrReplacements, 'Page.Wiki', $strWikiContent);
-ChuWiki::AddReplacement($astrReplacements, 'Page.Html', $strHtmlContent);
+$wiki->AddReplacement($astrReplacements, 'Page.Name', htmlspecialchars($strPage));
+$wiki->AddReplacement($astrReplacements, 'Page.Wiki', $strWikiContent);
+$wiki->AddReplacement($astrReplacements, 'Page.Html', $strHtmlContent);
 
 // Applique les remplacements
-$strContent = ChuWiki::ReplaceAll($strContent, $astrReplacements);
+$strContent = $wiki->ReplaceAll($strContent, $astrReplacements);
 
 /////////////////////////////////////////////////////////////
-ChuWiki::WriteXhtmlHeader();
+$wiki->WriteXhtmlHeader();
 echo $strContent;
 ?>
