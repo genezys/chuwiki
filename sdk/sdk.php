@@ -683,7 +683,9 @@ class ChuWiki
 			break;
 
 		default:
-			$this->Error('Erreur dans le fichier de configuration : Aucun renderer ou mauvais renderer spécifié. Seulement WikiRenderer ou wiki2xhtml sont autorisés.');
+			$this->Error('Erreur dans le fichier de configuration :'
+						.' Aucun renderer ou mauvais renderer spécifié.'
+						.' Seulement WikiRenderer ou wiki2xhtml sont autorisés.');
 			break;
 		}
 
@@ -779,6 +781,15 @@ class ChuWiki
 
 	function Save($strPage, $strWikiContent)
 	{
+		if( $this->IsSpam($strWikiContent, 
+							$_SERVER['REMOTE_ADDR'], 
+							$_SERVER['HTTP_USER_AGENT'], 
+							$_SERVER['HTTP_REFERER']) )
+		{
+			$this->Error('Cette modification semble contenir du contenu indésirable.'
+						.' Veuillez le modifier et recommencer.');
+		}
+		
 		// Création du répertoire des pages
 		$strPagePath = $this->GetPagePath();
 		$this->CreateDir($strPagePath);
@@ -972,7 +983,9 @@ class ChuWiki
 	{
 		if( isset($_POST['Search']) )
 		{
-			$strLocation = $this->GetScriptURI('Wiki') . $this->GetLangVar('SearchPage') . ' ' . $this->GetPostedValue('Search');
+			$strLocation = $this->GetScriptURI('Wiki') 
+						. $this->GetLangVar('SearchPage') . ' ' 
+						. $this->GetPostedValue('Search');
 			header('Location: ' . $strLocation);
 			exit;
 		}
@@ -1163,6 +1176,58 @@ class ChuWiki
 		{
 			header('Content-type: text/html; charset=' . $strCharset . '');
 		}
+	}
+	
+	function IsSpam($strContent, $strUserIp, $strUserAgent, $strReferer)
+	{
+		$strAkismetKey = $this->GetConfigVar('AkismetKey');
+		
+		// No key, no spam filtering
+		if( strlen($strAkismetKey) <= 0 )
+		{
+			return false;
+		}
+
+		// Akismet connection info 
+		$strHost = $strAkismetKey . '.rest.akismet.com';
+		$nPort = 80;
+		$strPath = '/1.1/comment-check';
+
+		// Build request
+		$strRequestContent = implode('&', array(
+			'blog=' . urlencode('http://' . $_SERVER['SERVER_NAME'] . $this->m_strWikiURI),
+			'user_ip=' . urlencode($strUserIp),
+			'user_agent=' . urlencode($strUserAgent),
+			'referrer=' . urlencode($strReferer),
+			'comment_content=' . urlencode($strContent)
+		));
+
+		// Send request
+		$strRequest  = 'POST '.$strPath.' HTTP/1.0'."\r\n";
+		$strRequest .= 'Host: '.$strHost."\r\n";
+		$strRequest .= 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8'."\r\n";
+		$strRequest .= 'Content-Length: '.strlen($strRequestContent)."\r\n";
+		$strRequest .= 'User-Agent: ChuWiki/'.CHUWIKI_VERSION."\r\n";
+		$strRequest .= "\r\n";
+		$strRequest .= $strRequestContent;
+
+		$strResponse = '';
+		if( false !== ( $sock = @fsockopen($strHost, $nPort, $nError, $strError, 3) ) )
+		{
+			fwrite($sock, $strRequest);
+			while ( !feof($sock) )
+			{
+				$strResponse .= fgets($sock, 1160); // One TCP-IP packet
+			}
+			fclose($sock);
+
+			$response = explode("\r\n\r\n", $strResponse, 2);
+			if( $response[1] === 'true' )
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 };
 
