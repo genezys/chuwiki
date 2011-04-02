@@ -25,7 +25,9 @@
 require(dirname(__FILE__) . '/sdk/sdk.php');
 /////////////////////////////////////////////////////////////
 
-$strWikiScript = $g_aConfig['WikiScript'];
+$wiki = ChuWiki::Instance();
+
+$strWikiScript = $wiki->GetConfigVar('WikiScript');
 if( $strWikiScript == '' )
 {
 	die();	
