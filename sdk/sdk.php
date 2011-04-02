@@ -238,7 +238,8 @@ class ChuWiki
 
 	function ErrorUnableToWrite()
 	{
-		$this->Error('Impossible d\'écrire cette page, veuillez vérifier que vous possédez les droits d\'écriture dans le répertoire des pages');
+		$this->Error('Impossible d\'écrire cette page, veuillez vérifier que'
+					.' vous possédez les droits d\'écriture dans le répertoire des pages');
 	}
 
 	function GetCurrentPage()
@@ -805,6 +806,7 @@ class ChuWiki
 		}
 
 		// On enregistre le contenu du fichier
+		date_default_timezone_set('Europe/Paris');
 		$date = time() + intval($this->GetConfigVar('TimeShift'));
 		$strDate = date('YmdHis', $date);
 		$strSavePath = $strPageDir . '/' . $strDate . '.' . $this->m_strExtension;

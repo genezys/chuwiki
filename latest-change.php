@@ -49,18 +49,21 @@ function FormatLongIso8601Date($strDate)
 	return date('Y-m-d H:i:s', $date);
 }
 
-$astrLatestChanges = chuwiki::GetLatestChangePageList();
+date_default_timezone_set('Europe/Paris');
+$wiki = ChuWiki::Instance();
+
+$astrLatestChanges = $wiki->GetLatestChangePageList();
 $strLatestDate = FormatRfc1123Date(reset($astrLatestChanges));
 
 $strDomain = 'http://' . $_SERVER['SERVER_NAME'];
-$strURI = $strDomain . $g_strWikiURI;
+$strURI = $strDomain . $wiki->m_strWikiURI;
 
 $aEntries = array();
 foreach($astrLatestChanges as $strPage => $strDate)
 {
 		$entry = array();
 		$entry['page'] = htmlspecialchars($strPage);
-		$entry['link'] = $strDomain . chuwiki::GetScriptURI('Wiki') . rawurlencode($strPage);
+		$entry['link'] = $strDomain . $wiki->GetScriptURI('Wiki') . rawurlencode($strPage);
 		$entry['date'] = $strDate;
 		$aEntries[] = $entry;
 }
@@ -71,9 +74,9 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
 ?>
 <rss version="2.0">
 <channel>
-	<title><?php echo $g_aConfig['Title'] ?></title>
+	<title><?php echo $wiki->GetConfigVar('Title') ?></title>
 	<link><?php echo $strURI ?></link>
-	<description><![CDATA[<?php echo $g_aLangConfig['ChangesPage'] ?>]]></description>
+	<description><![CDATA[<?php echo $wiki->GetLangVar('ChangesPage') ?>]]></description>
 	<lastBuildDate><?php echo $strLatestDate ?></lastBuildDate>
 
 <?php
