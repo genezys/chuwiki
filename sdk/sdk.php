@@ -24,7 +24,7 @@
 
 error_reporting(E_ALL);
 
-define('CHUWIKI_VERSION', 'ChuWiki 2.0α ($Rev$)');
+define('CHUWIKI_VERSION', 'ChuWiki 2.1');
 
 class ChuWiki
 {
