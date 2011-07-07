@@ -610,7 +610,7 @@ class ChuWiki
 				}
 				else if( $strCommand == 'toc' )
 				{
-					$strSpecial = $this->GenerateTableOFContents($astrLines);
+					$strSpecial = $this->GenerateTableOfContents($astrLines);
 				}
 				else if( $strCommand == 'category' )
 				{
