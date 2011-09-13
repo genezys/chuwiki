@@ -1,6 +1,6 @@
 .svn
 .DS_Store
-pages
+/pages
 /.hg
 /.hgignore
 /.hgtags
