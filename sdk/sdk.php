@@ -683,6 +683,17 @@ class ChuWiki
 			$strHtmlContent = $Renderer->transform($strWikiContent);
 			break;
 
+		case 'txt2tags':
+			if( !class_exists("txt2tags") )
+			{
+                require_once(dirname(__FILE__) . '/txt2tags/txt2tags.class.php');
+			}
+			$Renderer = new T2T();
+            $strHtmlContent = $Renderer->T2T($strWikiContent);
+            $Renderer->go();
+            $strHtmlContent = $Renderer->bodyhtml;
+			break;
+
 		default:
 			$this->Error('Erreur dans le fichier de configuration :'
 						.' Aucun renderer ou mauvais renderer spécifié.'
