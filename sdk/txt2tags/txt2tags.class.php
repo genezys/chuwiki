@@ -197,7 +197,7 @@ class T2T {
     $this->title = $this->esc($this->run_macros($this->R['header'][0]));
     $this->bodyhtml = $this->run_postproc($body); # %!postproc replacements
     $html = sprintf($this->snippets['html'], $this->title, $this->encoding, 
-      $GLOBALS['T2TVersion'], $this->csslink, $body);
+      'null', $this->csslink, $body);
     $this->fullhtml = $this->run_postproc($html); # %!postproc replacements
     
     if($output=='body') return $this->bodyhtml;

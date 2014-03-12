@@ -688,7 +688,7 @@ class ChuWiki
 			{
                 require_once(dirname(__FILE__) . '/txt2tags/txt2tags.class.php');
 			}
-			$Renderer = new T2T();
+			$Renderer = new T2T($strWikiContent);
             $strHtmlContent = $Renderer->T2T($strWikiContent);
             $Renderer->go();
             $strHtmlContent = $Renderer->bodyhtml;
